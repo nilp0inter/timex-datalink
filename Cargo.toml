@@ -1,0 +1,8 @@
+[package]
+name = "timex-datalink"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crc16 = "0.4.0"
+serial2 = "0.2.26"
