@@ -1,22 +1,22 @@
-use timex_datalink::client::protocol4::{Protocol4, Time, Alarm, Eeprom, SoundTheme, SoundOptions, WristApp, DateTime, TimeOfDay, Appointment, Anniversary, PhoneNumber, List};
+use timex_datalink::client::protocol4::{Protocol4, DateTime, TimeOfDay, Appointment, Anniversary, PhoneNumber, List};
 
 pub fn main() -> () {
     let data = vec![
         Protocol4::Sync,
         Protocol4::Start,
-        Protocol4::Time(Time {
+        Protocol4::Time {
             zone: 1,
             time: DateTime,
             is_24h: false,
             date_format: "%_m-%d-%y".to_string(),
-        }),
-        Protocol4::Alarm(Alarm {
+        },
+        Protocol4::Alarm {
             number: 1,
             audible: true,
             time: TimeOfDay,
             message: "Wake up".to_string(),
-        }),
-        Protocol4::Eeprom(Eeprom {
+        },
+        Protocol4::Eeprom {
             appointments: vec![
                 Appointment {
                     time: DateTime,
@@ -47,15 +47,17 @@ pub fn main() -> () {
                 },
             ],
             appointment_notification_minutes: None,
-        }),
-        Protocol4::SoundTheme(SoundTheme {
+        },
+        Protocol4::SoundTheme {
             spc_file: "spe_file".to_string(),
-        }),
-        Protocol4::SoundOptions(SoundOptions {
+        },
+        Protocol4::SoundOptions {
             hourly_chime: true,
             button_beep: true,
-        }),
-        Protocol4::WristApp(WristApp { zap_file: "zap_file".to_string() }),
+        },
+        Protocol4::WristApp {
+            zap_file: "zap_file".to_string()
+        },
         Protocol4::End
     ];
 
