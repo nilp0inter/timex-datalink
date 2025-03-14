@@ -2,8 +2,9 @@ use serde::{Serialize, Deserialize};
 use std::fs;
 use std::io;
 use std::path::Path;
-use crate::client::helpers::char_encoders::chars_for;
+use crate::client::helpers::char_encoders::{chars_for, eeprom_chars_for};
 use crate::client::helpers::crc_packets_wrapper::crc_packets_wrapper;
+use crate::client::helpers::length_packet_wrapper::length_packet_wrapper;
 
 /// Constants for packet types
 pub const CPACKET_START: u8 = 0x20;
@@ -263,6 +264,53 @@ impl WristAppData {
 pub struct Appointment {
     pub time: DateTime,
     pub message: String,
+}
+
+impl Appointment {
+    /// Create a new Appointment instance
+    ///
+    /// # Arguments
+    /// * `time` - Time of the appointment
+    /// * `message` - Appointment text
+    pub fn new(time: DateTime, message: String) -> Self {
+        Self { time, message }
+    }
+    
+    /// Generate a packet for this appointment
+    ///
+    /// # Returns
+    /// A vector of bytes representing the appointment packet
+    pub fn packet(&self) -> Vec<u8> {
+        // Implement according to the Ruby test case expectations
+        // The first bytes should be month, day, time_15m
+        let mut packet = vec![
+            self.time.month,
+            self.time.day,
+            self.time_15m(),
+        ];
+        
+        // Add the message characters
+        let message_chars = eeprom_chars_for(&self.message, 31);
+        packet.extend_from_slice(&message_chars);
+        
+        packet
+    }
+    
+    /// Generate a packet with length prefix
+    ///
+    /// # Returns
+    /// A vector of bytes representing the appointment packet with length prefix
+    pub fn packet_with_length(&self) -> Vec<u8> {
+        length_packet_wrapper(&self.packet())
+    }
+    
+    /// Calculate the time in 15-minute increments
+    /// 
+    /// Converts hour and minute to a single byte:
+    /// hour * 4 + minute / 15
+    fn time_15m(&self) -> u8 {
+        self.time.hour * 4 + self.time.minute / 15
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

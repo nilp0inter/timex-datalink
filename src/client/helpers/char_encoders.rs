@@ -98,30 +98,46 @@ pub fn protocol_6_chars_for(string_chars: &str, length: usize, pad: bool) -> Vec
 /// # Returns
 /// A vector of packed bytes
 pub fn eeprom_chars_for(string_chars: &str, length: usize) -> Vec<u8> {
+    use num_bigint::BigUint;
+    use num_traits::{Zero, ToPrimitive};
+    
     // Get character codes
     let mut chars = chars_for_with_map(string_chars, length, false, EEPROM_CHARS);
     
     // Append terminator
     chars.push(EEPROM_TERMINATOR);
     
-    // Pack into bytes using 6-bit encoding
-    // This implementation follows the Ruby code's approach:
+    // Create a BigUint to match Ruby's behavior exactly
+    let mut packed_int = BigUint::zero();
+    
+    // Pack bits according to the Ruby algorithm:
     // packed_int = chars.each_with_index.sum do |char, index|
     //   char << (6 * index)
     // end
-    // packed_int.digits(256)
-    
-    let mut packed_int: u128 = 0;
-    for (index, &char) in chars.iter().enumerate() {
-        packed_int |= (char as u128) << (6 * index);
+    for (i, &char_code) in chars.iter().enumerate() {
+        // Convert to BigUint and shift left by 6*i bits
+        let shifted = BigUint::from(char_code as u32) << (6 * i);
+        packed_int |= shifted;
     }
     
-    // Convert to bytes (base 256)
+    // Now convert to base-256 representation (bytes)
+    // This implements Ruby's digits(256) method
     let mut result = Vec::new();
+    let base = BigUint::from(256u32);
     let mut remaining = packed_int;
-    while remaining > 0 {
-        result.push((remaining % 256) as u8);
-        remaining /= 256;
+    
+    while remaining > BigUint::zero() {
+        // Get remainder when divided by 256
+        let remainder = &remaining % &base;
+        // Push the remainder as a byte
+        result.push(remainder.to_u8().unwrap_or(0));
+        // Integer division by 256
+        remaining /= &base;
+    }
+    
+    // If the number was zero, we need at least one digit
+    if result.is_empty() {
+        result.push(0);
     }
     
     result
@@ -145,6 +161,8 @@ pub fn phone_chars_for(string_chars: &str) -> Vec<u8> {
     // end
     // packed_int.digits(256)
     
+    // A u64 can fit 16 characters with 4 bits each
+    // For phone numbers, 12 chars should always fit within a u64 (4*12=48 bits < 64 bits)
     let mut packed_int: u64 = 0;
     for (index, &char) in chars.iter().enumerate() {
         packed_int |= (char as u64) << (4 * index);
@@ -156,6 +174,11 @@ pub fn phone_chars_for(string_chars: &str) -> Vec<u8> {
     while remaining > 0 {
         result.push((remaining % 256) as u8);
         remaining /= 256;
+    }
+    
+    // If we got no bytes (e.g., all zeros), add at least one byte
+    if result.is_empty() {
+        result.push(0);
     }
     
     result

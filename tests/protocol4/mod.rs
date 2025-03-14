@@ -2,6 +2,7 @@ mod start;
 mod time;
 mod alarm;
 mod sync;
+mod eeprom;
 
 // Import common test helpers
 use timex_datalink::client::helpers::crc_packets_wrapper::crc_packets_wrapper;
