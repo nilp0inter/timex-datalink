@@ -1,9 +1,7 @@
 use timex_datalink::client::protocol4::{
     Protocol4, DateTime, TimeOfDay, DateFormat,
-    Appointment, Anniversary, PhoneNumber, List, 
-    SoundThemeData, WristAppData
+    Appointment, Anniversary, PhoneNumber, List
 };
-use std::path::Path;
 
 pub fn main() {
     // Create protocol elements using the new constructor methods
@@ -85,7 +83,7 @@ pub fn main() {
         // Sound options
         {
             let mut options = Protocol4::sound_options();
-            if let Protocol4::SoundOptions { hourly_chime, button_beep } = &mut options {
+            if let Protocol4::SoundOptions { hourly_chime, button_beep: _ } = &mut options {
                 *hourly_chime = true;
             }
             options
