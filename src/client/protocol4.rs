@@ -319,6 +319,43 @@ pub struct Anniversary {
     pub anniversary: String,
 }
 
+impl Anniversary {
+    /// Create a new Anniversary instance
+    ///
+    /// # Arguments
+    /// * `time` - Time of anniversary
+    /// * `anniversary` - Anniversary text
+    pub fn new(time: DateTime, anniversary: String) -> Self {
+        Self { time, anniversary }
+    }
+    
+    /// Generate a packet for this anniversary
+    ///
+    /// # Returns
+    /// A vector of bytes representing the anniversary packet
+    pub fn packet(&self) -> Vec<u8> {
+        // The first bytes should be month and day
+        let mut packet = vec![
+            self.time.month,
+            self.time.day,
+        ];
+        
+        // Add the anniversary characters
+        let anniversary_chars = eeprom_chars_for(&self.anniversary, 31);
+        packet.extend_from_slice(&anniversary_chars);
+        
+        packet
+    }
+    
+    /// Generate a packet with length prefix
+    ///
+    /// # Returns
+    /// A vector of bytes representing the anniversary packet with length prefix
+    pub fn packet_with_length(&self) -> Vec<u8> {
+        length_packet_wrapper(&self.packet())
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PhoneNumber {
     pub name: String,
@@ -432,6 +469,16 @@ impl Protocol4 {
             lists: Vec::new(),
             appointment_notification_minutes: None,
         }
+    }
+    
+    /// Add an anniversary to the Eeprom
+    pub fn add_anniversary(&mut self, anniversary: Anniversary) -> &mut Self {
+        if let Self::Eeprom { anniversaries, .. } = self {
+            anniversaries.push(anniversary);
+        } else {
+            panic!("Cannot add anniversary to non-Eeprom variant");
+        }
+        self
     }
     
     /// Create a new SoundTheme from an SPC file path
@@ -605,6 +652,23 @@ impl PacketGenerator for Protocol4 {
             Self::End => {
                 // End packet: [0x21]
                 vec![vec![CPACKET_END]]
+            },
+            Self::Eeprom { appointments, anniversaries, phone_numbers: _, lists: _, appointment_notification_minutes: _ } => {
+                let mut packets = Vec::new();
+                
+                // Process appointments
+                for appointment in appointments {
+                    packets.push(appointment.packet_with_length());
+                }
+                
+                // Process anniversaries
+                for anniversary in anniversaries {
+                    packets.push(anniversary.packet_with_length());
+                }
+                
+                // Other EEPROM data will be implemented later
+                
+                packets
             },
             // Other variants will be implemented later
             _ => vec![],
