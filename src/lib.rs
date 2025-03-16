@@ -15,5 +15,6 @@ pub trait PacketGenerator {
 }
 
 pub mod protocol_4;
+pub mod helpers;
 
 pub use protocol_4::Protocol4;
