@@ -5,13 +5,15 @@
 use std::time::SystemTime;
 use crate::PacketGenerator;
 
+use crate::char_encoders::EepromString;
+
 /// Appointment structure for Protocol 4 EEPROM
 pub struct Appointment {
     /// Time of appointment
     pub time: SystemTime,
     
-    /// Appointment message text (will be truncated to fit watch requirements)
-    pub message: String,
+    /// Appointment message text (EEPROM encoded, max 31 characters)
+    pub message: EepromString,
 }
 
 impl PacketGenerator for Appointment {

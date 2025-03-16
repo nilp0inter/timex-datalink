@@ -5,6 +5,8 @@
 use std::time::SystemTime;
 use crate::PacketGenerator;
 
+use crate::char_encoders::CharString;
+
 /// Alarm structure for Protocol 4
 pub struct Alarm {
     /// Alarm number (from 1 to 5)
@@ -16,8 +18,8 @@ pub struct Alarm {
     /// Time of alarm
     pub time: SystemTime,
     
-    /// Alarm message text
-    pub message: String,
+    /// Alarm message text (max 8 characters)
+    pub message: CharString<8>,
 }
 
 impl PacketGenerator for Alarm {

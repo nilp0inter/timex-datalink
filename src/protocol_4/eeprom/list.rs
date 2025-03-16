@@ -19,10 +19,12 @@ pub enum Priority {
     Five,
 }
 
+use crate::char_encoders::EepromString;
+
 /// List structure for Protocol 4 EEPROM
 pub struct List {
-    /// List entry text (will be truncated to fit watch requirements)
-    pub list_entry: String,
+    /// List entry text (EEPROM encoded, max 31 characters)
+    pub list_entry: EepromString,
     
     /// Priority level (optional)
     pub priority: Option<Priority>,

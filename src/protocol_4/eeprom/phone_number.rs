@@ -17,13 +17,15 @@ pub enum PhoneType {
     Other,
 }
 
+use crate::char_encoders::{EepromString, PhoneString};
+
 /// PhoneNumber structure for Protocol 4 EEPROM
 pub struct PhoneNumber {
-    /// Contact name (will be truncated to fit watch requirements)
-    pub name: String,
+    /// Contact name (EEPROM encoded, max 31 characters)
+    pub name: EepromString,
     
-    /// Phone number string (digits and allowed symbols)
-    pub number: String,
+    /// Phone number string (special phone encoding, max 10 digits)
+    pub number: PhoneString,
     
     /// Type of phone number
     pub phone_type: PhoneType,

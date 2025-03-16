@@ -5,13 +5,15 @@
 use std::time::SystemTime;
 use crate::PacketGenerator;
 
+use crate::char_encoders::EepromString;
+
 /// Anniversary structure for Protocol 4 EEPROM
 pub struct Anniversary {
     /// Time of anniversary
     pub time: SystemTime,
     
-    /// Anniversary text (will be truncated to fit watch requirements)
-    pub anniversary: String,
+    /// Anniversary text (EEPROM encoded, max 31 characters)
+    pub anniversary: EepromString,
 }
 
 impl PacketGenerator for Anniversary {

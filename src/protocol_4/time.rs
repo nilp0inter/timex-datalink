@@ -27,6 +27,8 @@ pub enum DateFormat {
     YearDotMonthDotDay,
 }
 
+use crate::char_encoders::CharString;
+
 /// Time structure for Protocol 4
 pub struct Time {
     /// Time zone number (1 or 2)
@@ -42,7 +44,7 @@ pub struct Time {
     pub time: SystemTime,
     
     /// Name of time zone (optional, 3 chars max)
-    pub name: Option<String>,
+    pub name: Option<CharString<3>>,
 }
 
 impl PacketGenerator for Time {
