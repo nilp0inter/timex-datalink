@@ -3,6 +3,7 @@
 //! This module handles time functionality for Timex Datalink watches.
 
 use std::time::SystemTime;
+use crate::PacketGenerator;
 
 /// Date format options for Protocol 4
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,4 +43,10 @@ pub struct Time {
     
     /// Name of time zone (optional, 3 chars max)
     pub name: Option<String>,
+}
+
+impl PacketGenerator for Time {
+    fn packets(&self) -> Vec<Vec<u8>> {
+        todo!()
+    }
 }

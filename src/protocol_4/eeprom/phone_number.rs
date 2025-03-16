@@ -2,6 +2,8 @@
 //!
 //! This module handles phone numbers stored in the watch's EEPROM.
 
+use crate::PacketGenerator;
+
 /// Phone number type 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PhoneType {
@@ -25,4 +27,10 @@ pub struct PhoneNumber {
     
     /// Type of phone number
     pub phone_type: PhoneType,
+}
+
+impl PacketGenerator for PhoneNumber {
+    fn packets(&self) -> Vec<Vec<u8>> {
+        todo!()
+    }
 }

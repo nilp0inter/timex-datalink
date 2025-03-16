@@ -3,6 +3,7 @@
 //! This module handles alarms for Timex Datalink watches.
 
 use std::time::SystemTime;
+use crate::PacketGenerator;
 
 /// Alarm structure for Protocol 4
 pub struct Alarm {
@@ -17,4 +18,10 @@ pub struct Alarm {
     
     /// Alarm message text
     pub message: String,
+}
+
+impl PacketGenerator for Alarm {
+    fn packets(&self) -> Vec<Vec<u8>> {
+        todo!()
+    }
 }

@@ -2,6 +2,8 @@
 //!
 //! This module handles EEPROM data storage for Timex Datalink watches.
 
+use crate::PacketGenerator;
+
 pub mod anniversary;
 pub mod appointment;
 pub mod phone_number;
@@ -47,4 +49,10 @@ pub struct Eeprom {
     
     /// Appointment notification in minutes
     pub appointment_notification_minutes: Option<NotificationMinutes>,
+}
+
+impl PacketGenerator for Eeprom {
+    fn packets(&self) -> Vec<Vec<u8>> {
+        todo!()
+    }
 }
