@@ -31,11 +31,11 @@ pub struct Protocol4 {
     /// Start component (mandatory)
     pub start: Start,
     
-    /// Time component (optional)
-    pub time: Option<Time>,
+    /// Time components (can have multiple time zones)
+    pub times: Vec<Time>,
     
-    /// Alarm component (optional)
-    pub alarm: Option<Alarm>,
+    /// Alarm components (can have multiple alarms)
+    pub alarms: Vec<Alarm>,
     
     /// Sound options component (optional)
     pub sound_options: Option<SoundOptions>,

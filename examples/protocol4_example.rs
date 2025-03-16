@@ -89,20 +89,55 @@ fn main() {
         },
         start: Start {},
         
-        time: Some(Time {
-            zone: 1,
-            is_24h: false,
-            date_format: DateFormat::MonthDashDayDashYear,
-            time: time1,
-            name: CharString::new("PDT", true),
-        }),
+        times: vec![
+            Time {
+                zone: 1,
+                is_24h: false,
+                date_format: DateFormat::MonthDashDayDashYear,
+                time: time1,
+                name: CharString::new("PDT", true),
+            },
+            Time {
+                zone: 2,
+                is_24h: true,
+                date_format: DateFormat::MonthDashDayDashYear,
+                time: time1, // In a real app, this would be UTC time
+                name: CharString::new("GMT", true),
+            },
+        ],
         
-        alarm: Some(Alarm {
-            number: 1,
-            audible: true,
-            time: system_time_from_time(9, 0),
-            message: CharString::new("Wake up", false),
-        }),
+        alarms: vec![
+            Alarm {
+                number: 1,
+                audible: true,
+                time: system_time_from_time(9, 0),
+                message: CharString::new("Wake up", false),
+            },
+            Alarm {
+                number: 2,
+                audible: true,
+                time: system_time_from_time(9, 5),
+                message: CharString::new("For real", false),
+            },
+            Alarm {
+                number: 3,
+                audible: false,
+                time: system_time_from_time(9, 10),
+                message: CharString::new("Get up", false),
+            },
+            Alarm {
+                number: 4,
+                audible: true,
+                time: system_time_from_time(18, 0), // 6 PM
+                message: CharString::new("Or not", false),
+            },
+            Alarm {
+                number: 5,
+                audible: false,
+                time: system_time_from_time(14, 0), // 2 PM
+                message: CharString::new("Told you", false),
+            },
+        ],
         
         sound_options: Some(SoundOptions {
             hourly_chime: true,
@@ -110,8 +145,9 @@ fn main() {
         }),
         
         sound_theme: Some(SoundTheme {
-            // In a real app, we would load the SPC file data
-            sound_theme_data: vec![0x00, 0x01, 0x02, 0x03], // Placeholder data
+            // In a real app, we would load the data from "DEFHIGH.SPC"
+            // For this example, we use placeholder data
+            sound_theme_data: vec![0x00, 0x01, 0x02, 0x03], // Data from DEFHIGH.SPC would go here
         }),
         
         eeprom: Some(Eeprom {
@@ -123,8 +159,9 @@ fn main() {
         }),
         
         wrist_app: Some(WristApp {
-            // In a real app, we would load the ZAP file data
-            wrist_app_data: vec![0x00, 0x01, 0x02, 0x03], // Placeholder data
+            // In a real app, we would load the data from "TIMER13.ZAP" 
+            // For this example, we use placeholder data
+            wrist_app_data: vec![0x00, 0x01, 0x02, 0x03], // Data from TIMER13.ZAP would go here
         }),
         
         end: End {},
@@ -134,6 +171,8 @@ fn main() {
     // and transmit it to the watch.
     
     println!("Created Protocol4 structure with all components");
+    println!("- Time zones: {}", protocol.times.len());
+    println!("- Alarms: {}", protocol.alarms.len());
     println!("- Appointments: {}", protocol.eeprom.as_ref().unwrap().appointments.len());
     println!("- Anniversaries: {}", protocol.eeprom.as_ref().unwrap().anniversaries.len());
     println!("- Phone numbers: {}", protocol.eeprom.as_ref().unwrap().phone_numbers.len());
