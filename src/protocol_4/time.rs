@@ -43,8 +43,8 @@ pub struct Time {
     /// System time to use
     pub time: SystemTime,
     
-    /// Name of time zone (optional, 3 chars max)
-    pub name: Option<CharString<3>>,
+    /// Name of time zone (3 chars max)
+    pub name: CharString<3>,
 }
 
 impl PacketGenerator for Time {
