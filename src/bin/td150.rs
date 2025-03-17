@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::process;
 use std::time::SystemTime;
 
-use chrono::{Datelike, TimeZone, Timelike, Utc};
+use chrono::{Datelike, TimeZone, Timelike, Utc, Local};
 use clap::{Arg, ArgAction, Command};
 use timex_datalink::{
     char_encoders::CharString,
@@ -291,21 +291,81 @@ fn main() {
     // Create time models
     let mut time_models = Vec::new();
     if !no_time {
-        let time1 = SystemTime::now();
-        let time2 = SystemTime::now(); // For UTC, same as local in this case
+        // Get the current local time
+        let local_now = Local::now();
+        
+        // Calculate the timezone offset in seconds
+        let offset_seconds = local_now.offset().local_minus_utc() as i64;
+        
+        // Get the current UTC time
+        let utc_now = Utc::now();
+        
+        // For time1, we need to create a SystemTime that, when interpreted as UTC by the watch,
+        // will display as the correct local time
+        let time1 = SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(
+            (utc_now.timestamp() + offset_seconds) as u64
+        );
+        
+        // UTC time stays the same
+        let time2 = SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(utc_now.timestamp() as u64);
+
+        // Try to get a more meaningful timezone name
+        // First try to get the timezone from the TZ environment variable
+        let iana_tz = match std::env::var("TZ") {
+            Ok(tz) => tz,
+            // If TZ is not set, use a default format based on the current offset
+            Err(_) => format!("UTC{}", local_now.format("%:z")),
+        };
+        
+        // Extract a meaningful name from the IANA timezone
+        let tz_name = if iana_tz.contains('/') {
+            // For IANA names like "Europe/Madrid", extract the city part
+            let city = iana_tz.split('/').last().unwrap_or("HOME");
+            
+            // Clean up the city name (remove underscores, etc.)
+            city.replace('_', " ").to_string()
+        } else if iana_tz.starts_with("UTC") {
+            // For UTC offsets, use a more friendly name
+            "HOME".to_string()
+        } else {
+            // Use whatever we have
+            iana_tz.clone()
+        };
+        
+        if verbose {
+            println!("Detected timezone: {}", iana_tz);
+            println!("Using timezone name: {}", tz_name);
+            println!("Setting {} time to: {} (offset: {} seconds)", 
+                     tz_name,
+                     local_now.format("%Y-%m-%d %H:%M:%S"),
+                     offset_seconds);
+            println!("Setting UTC time to: {}", utc_now.format("%Y-%m-%d %H:%M:%S"));
+            
+            // Convert the times back to DateTime objects for verification
+            let time1_utc = Utc.timestamp_opt(
+                time1.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64, 0
+            ).unwrap();
+            let time2_utc = Utc.timestamp_opt(
+                time2.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64, 0
+            ).unwrap();
+            
+            println!("Time values sent to watch:");
+            println!("  Zone 1 ({}): {}", tz_name, time1_utc.format("%Y-%m-%d %H:%M:%S UTC"));
+            println!("  Zone 2 (UTC): {}", time2_utc.format("%Y-%m-%d %H:%M:%S UTC"));
+        }
 
         time_models.push(Time {
             zone: 1,
             is_24h: true,
             date_format: DateFormat::DayDashMonthDashYear,
             time: time1,
-            name: CharString::new("HOME", true),
+            name: CharString::new(&tz_name, true),
         });
 
         time_models.push(Time {
             zone: 2,
             is_24h: true,
-            date_format: DateFormat::YearDashMonthDashDay,
+            date_format: DateFormat::YearDotMonthDotDay,
             time: time2,
             name: CharString::new("UTC", true),
         });
