@@ -3,7 +3,6 @@
 //! This module handles anniversaries stored in the watch's EEPROM.
 
 use std::time::SystemTime;
-use crate::PacketGenerator;
 
 use crate::char_encoders::EepromString;
 
@@ -14,10 +13,4 @@ pub struct Anniversary {
     
     /// Anniversary text (EEPROM encoded, max 31 characters)
     pub anniversary: EepromString,
-}
-
-impl PacketGenerator for Anniversary {
-    fn packets(&self) -> Vec<Vec<u8>> {
-        todo!()
-    }
 }
