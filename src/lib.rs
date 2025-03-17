@@ -17,5 +17,7 @@ pub trait PacketGenerator {
 pub mod protocol_4;
 pub mod helpers;
 pub mod char_encoders;
+pub mod notebook_adapter;
 
 pub use protocol_4::Protocol4;
+pub use notebook_adapter::NotebookAdapter;

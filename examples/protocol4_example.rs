@@ -1,6 +1,9 @@
 use std::time::SystemTime;
+use std::env;
+use std::process;
 use chrono::{TimeZone, Utc};
 use timex_datalink::PacketGenerator;
+use timex_datalink::NotebookAdapter;
 use timex_datalink::protocol_4::{
     Protocol4,
     alarm::Alarm,
@@ -25,6 +28,16 @@ use timex_datalink::protocol_4::{
 use timex_datalink::char_encoders::{CharString, EepromString, PhoneString};
 
 fn main() {
+    // Get the serial port from command line arguments
+    let args: Vec<String> = env::args().collect();
+    let serial_port = match args.len() {
+        1 => {
+            println!("Usage: {} <serial_port_path>", args[0]);
+            println!("  Example: {} /dev/ttyUSB0", args[0]);
+            process::exit(1);
+        },
+        _ => args[1].clone(),
+    };
     // Create appointments
     let appointments = vec![
         Appointment {
@@ -178,12 +191,30 @@ fn main() {
     println!("Created Protocol4 structure with all components");
     println!("- Generated {} packet groups", all_packets.len());
     
-    // Print all packets
+    // Print packet summary
     for (i, packet) in all_packets.iter().enumerate() {
-        println!("Packet group {}: {:?}", i, packet);
+        // Only print the first few bytes of each packet to avoid overwhelming output
+        let preview: Vec<u8> = packet.iter().take(6).cloned().collect();
+        println!("Packet group {}: {} bytes, starts with {:02X?}...", i, packet.len(), preview);
     }
     
-    println!("\nReady to transmit packets to the watch.");
+    println!("\nTransmitting data to the watch on port: {}", serial_port);
+    
+    // Create the notebook adapter and send the packets
+    let adapter = NotebookAdapter::new(
+        serial_port,
+        None, // Use default byte sleep time
+        None, // Use default packet sleep time
+        true, // Enable verbose output
+    );
+    
+    match adapter.write(&all_packets) {
+        Ok(_) => println!("\nSuccessfully transmitted data to the watch!"),
+        Err(e) => {
+            eprintln!("\nError transmitting data: {}", e);
+            process::exit(1);
+        }
+    }
 }
 
 // Helper function to create a SystemTime from date components
