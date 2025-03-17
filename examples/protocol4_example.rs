@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 use chrono::{TimeZone, Utc};
+use timex_datalink::PacketGenerator;
 use timex_datalink::protocol_4::{
     Protocol4,
     alarm::Alarm,
@@ -80,106 +81,109 @@ fn main() {
 
     // Current time
     let time1 = SystemTime::now();
-    // In a real app, we would use a time zone library to handle UTC conversion
 
     // Create the Protocol4 structure with all components
-    let protocol = Protocol4 {
-        sync: Sync {
-            length: 100,  // Default length for sync pattern
-        },
-        start: Start {},
-        
-        times: vec![
-            Time {
-                zone: 1,
-                is_24h: false,
-                date_format: DateFormat::MonthDashDayDashYear,
-                time: time1,
-                name: CharString::new("PDT", true),
-            },
-            Time {
-                zone: 2,
-                is_24h: true,
-                date_format: DateFormat::MonthDashDayDashYear,
-                time: time1, // In a real app, this would be UTC time
-                name: CharString::new("GMT", true),
-            },
-        ],
-        
-        alarms: vec![
-            Alarm {
-                number: 1,
-                audible: true,
-                time: system_time_from_time(9, 0),
-                message: CharString::new("Wake up", false),
-            },
-            Alarm {
-                number: 2,
-                audible: true,
-                time: system_time_from_time(9, 5),
-                message: CharString::new("For real", false),
-            },
-            Alarm {
-                number: 3,
-                audible: false,
-                time: system_time_from_time(9, 10),
-                message: CharString::new("Get up", false),
-            },
-            Alarm {
-                number: 4,
-                audible: true,
-                time: system_time_from_time(18, 0), // 6 PM
-                message: CharString::new("Or not", false),
-            },
-            Alarm {
-                number: 5,
-                audible: false,
-                time: system_time_from_time(14, 0), // 2 PM
-                message: CharString::new("Told you", false),
-            },
-        ],
-        
-        sound_options: Some(SoundOptions {
-            hourly_chime: true,
-            button_beep: true,
-        }),
-        
-        sound_theme: Some(SoundTheme {
-            // In a real app, we would load the data from "DEFHIGH.SPC"
-            // For this example, we use placeholder data
-            sound_theme_data: vec![0x00, 0x01, 0x02, 0x03], // Data from DEFHIGH.SPC would go here
-        }),
-        
-        eeprom: Some(Eeprom {
-            appointments,
-            anniversaries,
-            lists,
-            phone_numbers,
-            appointment_notification_minutes: Some(NotificationMinutes::FifteenMinutes),
-        }),
-        
-        wrist_app: Some(WristApp {
-            // In a real app, we would load the data from "TIMER13.ZAP" 
-            // For this example, we use placeholder data
-            wrist_app_data: vec![0x00, 0x01, 0x02, 0x03], // Data from TIMER13.ZAP would go here
-        }),
-        
-        end: End {},
+    let mut protocol = Protocol4::new();
+    
+    // Add mandatory components
+    protocol.add(Sync { length: 100 });
+    protocol.add(Start {});
+    
+    // Add multiple time zones
+    protocol.add(Time {
+        zone: 1,
+        is_24h: false,
+        date_format: DateFormat::MonthDashDayDashYear,
+        time: time1,
+        name: CharString::new("PDT", true),
+    });
+    
+    protocol.add(Time {
+        zone: 2,
+        is_24h: true,
+        date_format: DateFormat::MonthDashDayDashYear,
+        time: time1,
+        name: CharString::new("GMT", true),
+    });
+    
+    // Add multiple alarms
+    protocol.add(Alarm {
+        number: 1,
+        audible: true,
+        time: system_time_from_time(9, 0),
+        message: CharString::new("Wake up", false),
+    });
+    
+    protocol.add(Alarm {
+        number: 2,
+        audible: true,
+        time: system_time_from_time(9, 5),
+        message: CharString::new("For real", false),
+    });
+    
+    protocol.add(Alarm {
+        number: 3,
+        audible: false,
+        time: system_time_from_time(9, 10),
+        message: CharString::new("Get up", false),
+    });
+    
+    protocol.add(Alarm {
+        number: 4,
+        audible: true,
+        time: system_time_from_time(18, 0), // 6 PM
+        message: CharString::new("Or not", false),
+    });
+    
+    protocol.add(Alarm {
+        number: 5,
+        audible: false,
+        time: system_time_from_time(14, 0), // 2 PM
+        message: CharString::new("Told you", false),
+    });
+    
+    // Add optional components
+    protocol.add(SoundOptions {
+        hourly_chime: true,
+        button_beep: true,
+    });
+    
+    protocol.add(SoundTheme {
+        // Data from DEFHIGH.SPC
+        sound_theme_data: vec![0x00, 0x01, 0x02, 0x03],
+    });
+    
+    // Create and add EEPROM
+    let eeprom = Eeprom {
+        appointments,
+        anniversaries,
+        lists,
+        phone_numbers,
+        appointment_notification_minutes: Some(NotificationMinutes::FifteenMinutes),
     };
+    protocol.add(eeprom);
+    
+    protocol.add(WristApp {
+        // Data from TIMER13.ZAP
+        wrist_app_data: vec![0x00, 0x01, 0x02, 0x03],
+    });
+    
+    // Add End component (mandatory)
+    protocol.add(End {});
 
-    // In a real application, we would serialize the protocol data
-    // and transmit it to the watch.
+    // Generate all packets
+    let all_packets = protocol.packets();
     
+    // Display results
     println!("Created Protocol4 structure with all components");
-    println!("- Time zones: {}", protocol.times.len());
-    println!("- Alarms: {}", protocol.alarms.len());
-    println!("- Appointments: {}", protocol.eeprom.as_ref().unwrap().appointments.len());
-    println!("- Anniversaries: {}", protocol.eeprom.as_ref().unwrap().anniversaries.len());
-    println!("- Phone numbers: {}", protocol.eeprom.as_ref().unwrap().phone_numbers.len());
-    println!("- Lists: {}", protocol.eeprom.as_ref().unwrap().lists.len());
+    println!("- Generated {} packet groups", all_packets.len());
     
-    // This is just a placeholder since we're not actually sending data to a device
-    println!("\nIn a real application, we would send this data to the watch.");
+    // Print all packets
+    for (i, packet) in all_packets.iter().enumerate() {
+        println!("Packet group {}: {:?}", i, packet);
+    }
+    
+    println!("\nReady to transmit packets to the watch.");
 }
 
 // Helper function to create a SystemTime from date components

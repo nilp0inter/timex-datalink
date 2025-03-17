@@ -20,35 +20,36 @@ pub use sound_theme::SoundTheme;
 pub use eeprom::Eeprom;
 pub use wrist_app::WristApp;
 
+use crate::PacketGenerator;
+
 /// Main Protocol 4 structure
 ///
-/// This struct holds all components of the Protocol 4 communication.
-/// Only Sync, Start, and End are mandatory fields, while all others are optional.
+/// This struct acts as a container for all Protocol 4 models that implement
+/// the PacketGenerator trait. It collects and orders packets from all models
+/// for transmission to the Timex Datalink watch.
 pub struct Protocol4 {
-    /// Sync component (mandatory)
-    pub sync: Sync,
+    /// Collection of models that implement PacketGenerator
+    models: Vec<Box<dyn PacketGenerator>>,
+}
+
+impl Protocol4 {
+    /// Create a new empty Protocol4 instance
+    pub fn new() -> Self {
+        Protocol4 {
+            models: Vec::new()
+        }
+    }
     
-    /// Start component (mandatory)
-    pub start: Start,
-    
-    /// Time components (can have multiple time zones)
-    pub times: Vec<Time>,
-    
-    /// Alarm components (can have multiple alarms)
-    pub alarms: Vec<Alarm>,
-    
-    /// Sound options component (optional)
-    pub sound_options: Option<SoundOptions>,
-    
-    /// Sound theme component (optional)
-    pub sound_theme: Option<SoundTheme>,
-    
-    /// EEPROM data component (optional)
-    pub eeprom: Option<Eeprom>,
-    
-    /// Wrist app component (optional)
-    pub wrist_app: Option<WristApp>,
-    
-    /// End component (mandatory)
-    pub end: End,
+    /// Add a model to the protocol
+    pub fn add<T: PacketGenerator + 'static>(&mut self, model: T) {
+        self.models.push(Box::new(model));
+    }
+}
+
+impl PacketGenerator for Protocol4 {
+    fn packets(&self) -> Vec<Vec<u8>> {
+        self.models.iter()
+            .flat_map(|model| model.packets())
+            .collect()
+    }
 }

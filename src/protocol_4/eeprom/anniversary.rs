@@ -20,15 +20,31 @@ impl Anniversary {
     /// 
     /// This returns the raw packet bytes without the length prefix
     fn packet_content(&self) -> Vec<u8> {
-        // Extract month and day from SystemTime
-        let duration_since_epoch = self.time
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("Time went backwards");
-        
-        let datetime = chrono::DateTime::<chrono::Utc>::from_timestamp(
-            duration_since_epoch.as_secs() as i64,
-            0
-        ).expect("Invalid timestamp");
+        // Convert SystemTime to chrono::DateTime for easier month/day extraction
+        // We need to handle dates that may be before the Unix epoch
+        let datetime = match self.time.duration_since(std::time::UNIX_EPOCH) {
+            Ok(duration) => {
+                chrono::DateTime::<chrono::Utc>::from_timestamp(
+                    duration.as_secs() as i64,
+                    0
+                ).expect("Invalid positive timestamp")
+            },
+            Err(_) => {
+                // For dates before Unix epoch (1970-01-01)
+                // We need to handle this differently
+                // First convert to a duration before epoch
+                let duration_before_epoch = std::time::UNIX_EPOCH
+                    .duration_since(self.time)
+                    .expect("Time error");
+                
+                // Create a DateTime by subtracting from epoch
+                let seconds_before_epoch = -(duration_before_epoch.as_secs() as i64);
+                chrono::DateTime::<chrono::Utc>::from_timestamp(
+                    seconds_before_epoch,
+                    0
+                ).expect("Invalid negative timestamp")
+            }
+        };
         
         let month = datetime.month() as u8;
         let day = datetime.day() as u8;
