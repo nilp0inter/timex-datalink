@@ -26,7 +26,7 @@ impl PhoneNumber {
         PhoneNumber { name, number, type_code }
     }
     
-    // Format the number with type for encoding
+    // Format the number with type for consistency with Ruby implementation
     fn number_with_type(&self) -> String {
         format!("{} {}", self.number, self.type_code)
     }
@@ -34,21 +34,24 @@ impl PhoneNumber {
 
 impl EepromModel for PhoneNumber {
     fn packet(&self) -> Vec<u8> {
-        // Removed unused constant PHONE_DIGITS
+        // Encode number_with_type as in Ruby
+        // From the Ruby implementation:
+        // number_with_type_padded = "#{number} #{type}".rjust(PHONE_DIGITS)
+        // number_with_type_characters = phone_chars_for(number_with_type_padded)
+        let number_with_type = self.number_with_type();
+        let phone_bytes = PhoneString::new(&number_with_type).as_bytes().to_vec();
         
-        // Encode the phone number and type
-        let number_type = self.number_with_type();
-        let phone_bytes = PhoneString::new(&number_type).as_bytes().to_vec();
-        
-        // Encode the name
+        // Encode name as in Ruby
+        // From the Ruby implementation:
+        // name_characters = eeprom_chars_for(name)
         let name_bytes = EepromString::new(&self.name).as_bytes().to_vec();
         
-        // Combine the data
+        // Combine data as in Ruby: [number_with_type_characters, name_characters].flatten
         let mut data = Vec::with_capacity(phone_bytes.len() + name_bytes.len());
         data.extend(phone_bytes);
         data.extend(name_bytes);
         
-        // Add packet length byte at the beginning
+        // Add packet length byte at the beginning (LengthPacketWrapper in Ruby)
         let mut packet = Vec::with_capacity(data.len() + 1);
         packet.push((data.len() + 1) as u8); // +1 for the length byte itself
         packet.extend(data);

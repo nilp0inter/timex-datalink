@@ -57,33 +57,43 @@ impl Eeprom {
     
     // Helper to calculate items_addresses as in Ruby
     fn items_addresses(&self) -> Vec<u8> {
-        const START_ADDRESS: u16 = 0x0236;
+        // This function directly follows the Ruby code:
+        // def items_addresses
+        //   address = START_ADDRESS
+        //
+        //   all_items.each_with_object([]) do |items, addresses|
+        //     addresses.concat(address.divmod(256))
+        //
+        //     address += items.sum { |item| item.packet.length }
+        //   end
+        // end
         
+        const START_ADDRESS: u16 = 0x0236;
         let mut address = START_ADDRESS;
-        let mut addresses = Vec::with_capacity(8);
+        let mut addresses = Vec::new();
         
         // Process appointments
-        let (msb, lsb) = ((address >> 8) as u8, (address & 0xFF) as u8);
-        addresses.push(lsb);
+        let (lsb, msb) = (address as u8, (address >> 8) as u8);
         addresses.push(msb);
+        addresses.push(lsb);
         address += self.appointments.iter().map(|item| item.packet().len() as u16).sum::<u16>();
         
         // Process lists
-        let (msb, lsb) = ((address >> 8) as u8, (address & 0xFF) as u8);
-        addresses.push(lsb);
+        let (lsb, msb) = (address as u8, (address >> 8) as u8);
         addresses.push(msb);
+        addresses.push(lsb);
         address += self.lists.iter().map(|item| item.packet().len() as u16).sum::<u16>();
         
         // Process phone numbers
-        let (msb, lsb) = ((address >> 8) as u8, (address & 0xFF) as u8);
-        addresses.push(lsb);
+        let (lsb, msb) = (address as u8, (address >> 8) as u8);
         addresses.push(msb);
+        addresses.push(lsb);
         address += self.phone_numbers.iter().map(|item| item.packet().len() as u16).sum::<u16>();
         
         // Process anniversaries
-        let (msb, lsb) = ((address >> 8) as u8, (address & 0xFF) as u8);
-        addresses.push(lsb);
+        let (lsb, msb) = (address as u8, (address >> 8) as u8);
         addresses.push(msb);
+        addresses.push(lsb);
         
         addresses
     }
@@ -246,8 +256,16 @@ mod tests {
         // Generate the packets
         let packets = eeprom.packets();
         
-        // Verify there are multiple packets
-        assert!(packets.len() > 1);
+        // Verify the packets match the golden fixture
+        #[rustfmt::skip]
+        let expected = vec![
+            vec![5, 147, 1, 49, 189],
+            vec![20, 144, 1, 1, 2, 54, 2, 73, 2, 73, 2, 73, 1, 0, 0, 0, 22, 255, 146, 12],
+            vec![25, 145, 1, 1, 19, 10, 31, 76, 28, 163, 108, 14, 217, 69, 14, 121, 57, 18, 20, 45, 216, 198, 253, 161, 244],
+            vec![5, 146, 1, 161, 188]
+        ];
+        
+        assert_eq!(packets, expected, "EEPROM appointment packets don't match golden fixture");
     }
     
     #[test]
@@ -263,8 +281,16 @@ mod tests {
         // Generate the packets
         let packets = eeprom.packets();
         
-        // Verify there are multiple packets
-        assert!(packets.len() > 1);
+        // Verify the packets match the golden fixture
+        #[rustfmt::skip]
+        let expected = vec![
+            vec![5, 147, 1, 49, 189],
+            vec![20, 144, 1, 1, 2, 54, 2, 54, 2, 54, 2, 54, 0, 0, 0, 1, 0, 255, 195, 98],
+            vec![32, 145, 1, 1, 26, 7, 3, 155, 83, 57, 10, 231, 144, 216, 67, 46, 10, 67, 145, 29, 70, 118, 145, 67, 62, 94, 231, 109, 206, 15, 200, 224],
+            vec![5, 146, 1, 161, 188]
+        ];
+        
+        assert_eq!(packets, expected, "EEPROM anniversary packets don't match golden fixture");
     }
     
     #[test]
@@ -281,8 +307,16 @@ mod tests {
         // Generate the packets
         let packets = eeprom.packets();
         
-        // Verify there are multiple packets
-        assert!(packets.len() > 1);
+        // Verify the packets match the golden fixture
+        #[rustfmt::skip]
+        let expected = vec![
+            vec![5, 147, 1, 49, 189],
+            vec![20, 144, 1, 1, 2, 54, 2, 54, 2, 54, 2, 70, 0, 0, 1, 0, 0, 255, 56, 67],
+            vec![22, 145, 1, 1, 16, 17, 33, 34, 51, 51, 207, 150, 178, 117, 34, 105, 49, 79, 37, 254, 203, 73],
+            vec![5, 146, 1, 161, 188]
+        ];
+        
+        assert_eq!(packets, expected, "EEPROM phone number packets don't match golden fixture");
     }
     
     #[test]
@@ -298,8 +332,16 @@ mod tests {
         // Generate the packets
         let packets = eeprom.packets();
         
-        // Verify there are multiple packets
-        assert!(packets.len() > 1);
+        // Verify the packets match the golden fixture
+        #[rustfmt::skip]
+        let expected = vec![
+            vec![5, 147, 1, 49, 189],
+            vec![20, 144, 1, 1, 2, 54, 2, 54, 2, 69, 2, 69, 0, 1, 0, 0, 0, 255, 54, 61],
+            vec![21, 145, 1, 1, 15, 2, 150, 247, 60, 149, 179, 145, 139, 163, 108, 210, 5, 113, 63, 68, 23],
+            vec![5, 146, 1, 161, 188]
+        ];
+        
+        assert_eq!(packets, expected, "EEPROM list packets don't match golden fixture");
     }
     
     #[test]

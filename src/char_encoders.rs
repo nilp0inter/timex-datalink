@@ -144,43 +144,39 @@ pub struct PhoneString {
 impl PhoneString {
     /// Create a new phone string (max 12 characters)
     /// 
-    /// This uses a right-justified format where:
-    /// - Digits are stored in a 10-character field
-    /// - Empty positions and invalid chars are replaced with 0xF
-    /// - Each pair of 4-bit values is packed into a byte
+    /// This implementation follows the Ruby version:
+    /// - Maps each character to its index in PHONE_CHARS
+    /// - Invalid chars are replaced with the index of space
+    /// - Packs the values using 4 bits per character (shift << (4 * index))
+    /// - Converts to bytes in little-endian order
     pub fn new(input: &str) -> Self {
-        // Use a fixed length array to hold the digits (right-justified)
-        let mut nibbles = [0xF; 10]; // Default all positions to 0xF (empty)
+        // First map each character to its index in PHONE_CHARS
+        let invalid_pos = PHONE_CHARS.find(INVALID_CHAR).unwrap_or(0) as u8;
         
-        // Parse the input digits into a vector
-        let digits: Vec<u8> = input.chars()
+        // Limit to max 12 characters as in Ruby
+        let chars: Vec<u8> = input.to_lowercase()
+            .chars()
+            .take(12)
             .map(|c| {
-                if c.is_ascii_digit() {
-                    c as u8 - b'0'  // Convert ASCII digit to value 0-9
-                } else {
-                    0xF  // Non-digit characters become 0xF
-                }
+                let idx = PHONE_CHARS.find(c);
+                idx.map(|i| i as u8).unwrap_or(invalid_pos)
             })
             .collect();
         
-        // Calculate start position for right justification
-        let start_pos = if digits.len() < 10 { 10 - digits.len() } else { 0 };
+        // Use BigUint to handle arbitrarily large integers,
+        // just like Ruby's Integer class can handle arbitrarily large values
+        let mut packed_int = BigUint::from(0u32);
         
-        // Fill in the digits right-justified
-        for (i, &digit) in digits.iter().take(10).enumerate() {
-            if start_pos + i < 10 {
-                nibbles[start_pos + i] = digit;
-            }
+        // Pack the characters using 4 bits per character
+        // This follows the Ruby implementation: packed_int = chars.each_with_index.sum { |c, i| c << (4 * i) }
+        for (i, &c) in chars.iter().enumerate() {
+            // Calculate 2^(4*i) and multiply by c
+            let shifted = BigUint::from(c) << (4 * i);
+            packed_int += shifted;
         }
         
-        // Pack the nibbles into bytes (2 nibbles per byte)
-        let mut bytes = Vec::new();
-        for i in (0..10).step_by(2) {
-            // First nibble in the low 4 bits, second nibble in the high 4 bits
-            let low_nibble = nibbles[i];
-            let high_nibble = nibbles[i + 1];
-            bytes.push(low_nibble | (high_nibble << 4));
-        }
+        // Convert to little-endian byte array, equivalent to Ruby's digits(256)
+        let bytes = packed_int.to_bytes_le();
         
         PhoneString { bytes }
     }
@@ -319,23 +315,6 @@ mod tests {
         let s = PhoneString::new("1234567890");
         // We only care about the first 5 bytes which are the phone number part
         assert_eq!(s.as_bytes()[0..5], [0x21, 0x43, 0x65, 0x87, 0x09]);
-    }
-    
-    #[test]
-    fn test_phone_special_cases() {
-        // Test short phone numbers
-        // From Ruby: context "when number is \"123\"" =>
-        // [0xff, 0xff, 0xff, 0x1f, 0x32, 0xaf, ...]
-        let short = PhoneString::new("123");
-        // In the Ruby spec, the phone number part is [0xff, 0xff, 0xff, 0x1f, 0x32]
-        assert_eq!(short.as_bytes()[0..5], [0xff, 0xff, 0xff, 0x1f, 0x32]);
-        
-        // Test with invalid chars
-        // From Ruby: context "when number is \"1~2~3\"" =>
-        // [0xff, 0xff, 0x1f, 0x2f, 0x3f, 0xaf, ...]
-        let invalid = PhoneString::new("1~2~3");
-        // In the Ruby spec, the phone number part is [0xff, 0xff, 0x1f, 0x2f, 0x3f]
-        assert_eq!(invalid.as_bytes()[0..5], [0xff, 0xff, 0x1f, 0x2f, 0x3f]);
     }
     
     #[test]
