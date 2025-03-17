@@ -4,7 +4,7 @@
 
 use std::time::SystemTime;
 use crate::PacketGenerator;
-
+use chrono::{DateTime, Utc, Timelike};
 use crate::char_encoders::CharString;
 
 /// Alarm structure for Protocol 4
@@ -24,7 +24,43 @@ pub struct Alarm {
 
 impl PacketGenerator for Alarm {
     fn packets(&self) -> Vec<Vec<u8>> {
-        todo!()
+        // Constants from Ruby implementation
+        const CPACKET_ALARM: u8 = 0x50;
+        
+        // Extract hour and minute from SystemTime 
+        // Convert SystemTime to chrono::DateTime to easily get hour and minute
+        let duration_since_epoch = self.time
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Time went backwards");
+        let datetime = DateTime::<Utc>::from_timestamp(
+            duration_since_epoch.as_secs() as i64, 
+            0
+        ).expect("Invalid timestamp");
+        
+        let hour = datetime.hour() as u8;
+        let minute = datetime.minute() as u8;
+        
+        // Create the raw packet without CRC
+        let mut raw_packet = Vec::with_capacity(16); // Approximate capacity
+        raw_packet.push(CPACKET_ALARM);  // Alarm command
+        raw_packet.push(self.number);    // Alarm number
+        raw_packet.push(hour);           // Hour
+        raw_packet.push(minute);         // Minute
+        raw_packet.push(0);              // Two zeros as per Ruby implementation
+        raw_packet.push(0);
+        
+        // Add message characters - make sure to get the full 8 characters
+        // We need to ensure we're getting all 8 characters (padded if necessary)
+        for &byte in self.message.as_array() {
+            raw_packet.push(byte);
+        }
+        
+        // Add audible flag
+        raw_packet.push(if self.audible { 1 } else { 0 });
+        
+        // Apply CRC wrapping
+        use crate::helpers::crc_packets_wrapper::wrap_packets_with_crc;
+        wrap_packets_with_crc(vec![raw_packet])
     }
 }
 
@@ -59,9 +95,7 @@ mod tests {
 
         // From golden fixture: alarm_basic.jsonl
         #[rustfmt::skip]
-        let expected = vec![vec![
-            18, 80, 1, 9, 0, 0, 0, 32, 10, 20, 14, 36, 30, 25, 36, 1, 32, 240
-        ]];
+        let expected = vec![vec![18,80,1,9,0,0,0,32,10,20,14,36,30,25,36,1,32,240]];
 
         assert_eq!(alarm.packets(), expected);
     }
@@ -77,9 +111,7 @@ mod tests {
 
         // From golden fixture: alarm_silent.jsonl
         #[rustfmt::skip]
-        let expected = vec![vec![
-            18, 80, 3, 9, 10, 0, 0, 16, 14, 29, 36, 30, 25, 36, 36, 0, 191, 169
-        ]];
+        let expected = vec![vec![18,80,3,9,10,0,0,16,14,29,36,30,25,36,36,0,191,169]];
 
         assert_eq!(alarm.packets(), expected);
     }
