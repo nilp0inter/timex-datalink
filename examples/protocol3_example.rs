@@ -4,14 +4,13 @@ use std::process;
 use timex_datalink::{
     Protocol3, PacketGenerator, NotebookAdapter,
     protocol_3::{
-        Sync, Start, End, Time, Alarm, SoundOptions, SoundTheme, WristApp,
+        Sync, Start, End, Time, Alarm, SoundOptions,
         eeprom::{Eeprom, Appointment, Anniversary, PhoneNumber, List}
     },
     char_encoders::CharString,
     protocol_3::time::DateFormat,
 };
 use chrono::{DateTime, Utc, TimeZone};
-use std::path::PathBuf;
 
 // Helper function to create a SystemTime from date components
 fn system_time_from_date(year: i32, month: u32, day: u32, hour: u32, min: u32) -> SystemTime {
@@ -31,20 +30,7 @@ fn system_time_from_date(year: i32, month: u32, day: u32, hour: u32, min: u32) -
     }
 }
 
-// Helper function to create a SystemTime with just hour and minute
-fn system_time_from_time(hour: u32, min: u32) -> SystemTime {
-    // For alarms, we only care about hour and minute, so use a fixed date
-    // Using 2000-01-01 as the base date
-    let naive_dt = chrono::NaiveDate::from_ymd_opt(2000, 1, 1)
-        .unwrap()
-        .and_hms_opt(hour, min, 0)
-        .unwrap();
-    
-    let dt = Utc.from_utc_datetime(&naive_dt);
-    
-    // Convert to system time
-    SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(dt.timestamp() as u64)
-}
+// Removed the unused function system_time_from_time
 
 fn main() {
     // Get the serial port from command line arguments
@@ -197,8 +183,8 @@ fn main() {
     // Add the EEPROM to the protocol
     protocol.add(eeprom);
     
-    // Use absolute paths for the fixture files
-    let base_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    // Use absolute paths for the fixture files (commented out since not used)
+    // let base_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     
     // // Load a sound theme from the example SPC file
     // println!("Loading sound theme from EXAMPLE.SPC...");
@@ -273,8 +259,8 @@ fn main() {
         // Create the notebook adapter and send the packets
         let adapter = NotebookAdapter::new(
             serial_port,
-            None, // Use default byte sleep time
-            None, // Use default packet sleep time
+            Some(0.014), // Use faster sleep times for the example
+            Some(0.08), // Use faster sleep times for the example
             true, // Enable verbose output
         );
         

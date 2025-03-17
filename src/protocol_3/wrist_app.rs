@@ -25,7 +25,7 @@ impl WristApp {
     
     /// Create a new WristApp instance from a ZAP file
     pub fn from_zap_file<P: AsRef<Path>>(zap_file: P) -> io::Result<Self> {
-        const WRIST_APP_CODE_INDEX: usize = 8;
+        // Removed unused constant WRIST_APP_CODE_INDEX
         
         // For testing, we'll hard-code the binary data from the golden fixture
         // In a real application, we'd need a more robust parser for the ZAP file format

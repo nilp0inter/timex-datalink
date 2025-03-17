@@ -60,8 +60,47 @@
             mainProgram = "timex-datalink";
           };
         };
+        
+        # Add td150 command as a separate package
+        packages.td150 = pkgs.rustPlatform.buildRustPackage {
+          pname = "td150";
+          version = "0.1.0";
 
-        packages.default = self'.packages.qkeypie;
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+          ];
+
+          src = ./.;
+          
+          # Only build and install the td150 binary
+          buildPhase = ''
+            runHook preBuild
+            cargo build --release --bin td150
+            runHook postBuild
+          '';
+          
+          installPhase = ''
+            runHook preInstall
+            mkdir -p $out/bin
+            cp target/release/td150 $out/bin/
+            runHook postInstall
+          '';
+
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+          };
+
+          meta = with nixpkgs.lib; {
+            description = "Timex Datalink 150 protocol 3 data transfer tool";
+            homepage = "https://github.com/nilp0inter/timex-datalink";
+            license = licenses.gpl3;
+            platforms = platforms.linux;
+            maintainers = with maintainers; [nilp0inter];
+            mainProgram = "td150";
+          };
+        };
+
+        packages.default = self'.packages.timex-datalink;
 
         formatter = pkgs.alejandra;
       };

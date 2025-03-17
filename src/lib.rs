@@ -19,6 +19,7 @@ pub mod protocol_4;
 pub mod helpers;
 pub mod char_encoders;
 pub mod notebook_adapter;
+pub mod devices;
 
 pub use protocol_3::Protocol3;
 pub use protocol_4::Protocol4;

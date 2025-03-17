@@ -34,7 +34,7 @@ impl PhoneNumber {
 
 impl EepromModel for PhoneNumber {
     fn packet(&self) -> Vec<u8> {
-        const PHONE_DIGITS: usize = 12;
+        // Removed unused constant PHONE_DIGITS
         
         // Encode the phone number and type
         let number_type = self.number_with_type();

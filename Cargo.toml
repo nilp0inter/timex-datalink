@@ -12,6 +12,7 @@ serde_json = "1.0.125"
 serde_yaml = "0.9.34"
 serial2 = "0.2.26"
 chrono = "0.4.31"
+clap = "4.5.5"
 
 # Include fixtures directory in the package for tests
 [package.metadata]
