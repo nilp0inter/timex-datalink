@@ -7,6 +7,7 @@ use std::time::SystemTime;
 use chrono::{Datelike, TimeZone, Timelike, Utc, Local};
 use clap::{Arg, ArgAction, Command};
 use timex_datalink::{
+    helpers::crc_packets_wrapper::wrap_packets_with_crc,
     char_encoders::CharString,
     devices::timex_datalink_150::TimexData,
     protocol_3::{
@@ -22,7 +23,8 @@ struct Beep;
 
 impl PacketGenerator for Beep {
     fn packets(&self) -> Vec<Vec<u8>> {
-        vec![vec![0x23, 0x04, 0x3e, 0xa6, 0x01, 0xc7, 0x00, 0x28, 0x81]]
+        let raw_packets = vec![vec![0x23, 0x04, 0x3e, 0xa6, 0x01, 0xc7, 0x00, 0x28, 0x81]];
+        wrap_packets_with_crc(raw_packets)
     }
 }
 
