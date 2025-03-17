@@ -90,7 +90,5 @@ impl NotebookAdapter {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     // Add tests here if needed
 }

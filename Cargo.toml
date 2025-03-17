@@ -17,3 +17,11 @@ chrono = "0.4.31"
 [package.metadata]
 include = ["fixtures/**/*"]
 
+[[example]]
+name = "protocol3_example"
+path = "examples/protocol3_example.rs"
+
+[[example]]
+name = "protocol4_example"
+path = "examples/protocol4_example.rs"
+

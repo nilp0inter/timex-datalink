@@ -14,10 +14,12 @@ pub trait PacketGenerator {
     fn packets(&self) -> Vec<Vec<u8>>;
 }
 
+pub mod protocol_3;
 pub mod protocol_4;
 pub mod helpers;
 pub mod char_encoders;
 pub mod notebook_adapter;
 
+pub use protocol_3::Protocol3;
 pub use protocol_4::Protocol4;
 pub use notebook_adapter::NotebookAdapter;
