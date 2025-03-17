@@ -15,7 +15,19 @@ pub struct SoundOptions {
 
 impl PacketGenerator for SoundOptions {
     fn packets(&self) -> Vec<Vec<u8>> {
-        todo!()
+        // Constants from Ruby implementation
+        const CPACKET_BEEPS: u8 = 0x71;
+        
+        // Create the raw packet
+        let raw_packet = vec![
+            CPACKET_BEEPS,
+            if self.hourly_chime { 1 } else { 0 },
+            if self.button_beep { 1 } else { 0 }
+        ];
+        
+        // Apply CRC wrapping
+        use crate::helpers::crc_packets_wrapper::wrap_packets_with_crc;
+        wrap_packets_with_crc(vec![raw_packet])
     }
 }
 
