@@ -3,6 +3,7 @@
 //! This module handles EEPROM data storage for Timex Datalink watches.
 
 use crate::PacketGenerator;
+use chrono::Datelike;
 
 pub mod anniversary;
 pub mod appointment;
@@ -51,9 +52,157 @@ pub struct Eeprom {
     pub appointment_notification_minutes: Option<NotificationMinutes>,
 }
 
+/// Convert NotificationMinutes to its numeric value
+fn notification_minutes_value(minutes: Option<NotificationMinutes>) -> u8 {
+    match minutes {
+        Some(NotificationMinutes::None) => 0,
+        Some(NotificationMinutes::FiveMinutes) => 1,
+        Some(NotificationMinutes::TenMinutes) => 2,
+        Some(NotificationMinutes::FifteenMinutes) => 3,
+        Some(NotificationMinutes::TwentyMinutes) => 4,
+        Some(NotificationMinutes::TwentyFiveMinutes) => 5,
+        Some(NotificationMinutes::ThirtyMinutes) => 6,
+        None => 0xFF, // APPOINTMENT_NO_NOTIFICATION
+    }
+}
+
 impl PacketGenerator for Eeprom {
     fn packets(&self) -> Vec<Vec<u8>> {
-        todo!()
+        // Constants from Ruby implementation
+        const CPACKET_CLEAR: [u8; 2] = [0x93, 0x01];
+        const CPACKET_SECT: [u8; 2] = [0x90, 0x01];
+        const CPACKET_DATA: [u8; 2] = [0x91, 0x01];
+        const CPACKET_END: [u8; 2] = [0x92, 0x01];
+        const CPACKET_DATA_LENGTH: usize = 32;
+        const START_ADDRESS: u16 = 0x0236;
+        
+        // Get packet data for each type
+        let appointment_packets: Vec<Vec<u8>> = self.appointments.iter()
+            .map(|app| app.packet())
+            .collect();
+            
+        let list_packets: Vec<Vec<u8>> = self.lists.iter()
+            .map(|list| list.packet())
+            .collect();
+            
+        let phone_packets: Vec<Vec<u8>> = self.phone_numbers.iter()
+            .map(|phone| phone.packet())
+            .collect();
+            
+        let anniversary_packets: Vec<Vec<u8>> = self.anniversaries.iter()
+            .map(|anniv| anniv.packet())
+            .collect();
+        
+        // Combine all packets
+        let mut all_items = Vec::new();
+        all_items.extend(appointment_packets.clone());
+        all_items.extend(list_packets.clone());
+        all_items.extend(phone_packets.clone());
+        all_items.extend(anniversary_packets.clone());
+        
+        // Calculate starting addresses for each section
+        let mut address = START_ADDRESS;
+        let mut addresses = Vec::new();
+        
+        // Calculate address for appointment section
+        addresses.push((address >> 8) as u8);
+        addresses.push((address & 0xFF) as u8);
+        for packet in &appointment_packets {
+            address += packet.len() as u16;
+        }
+        
+        // Calculate address for list section
+        addresses.push((address >> 8) as u8);
+        addresses.push((address & 0xFF) as u8);
+        for packet in &list_packets {
+            address += packet.len() as u16;
+        }
+        
+        // Calculate address for phone section
+        addresses.push((address >> 8) as u8);
+        addresses.push((address & 0xFF) as u8);
+        for packet in &phone_packets {
+            address += packet.len() as u16;
+        }
+        
+        // Calculate address for anniversary section
+        addresses.push((address >> 8) as u8);
+        addresses.push((address & 0xFF) as u8);
+        for packet in &anniversary_packets {
+            address += packet.len() as u16;
+        }
+        
+        // Get all items lengths
+        let items_lengths = vec![
+            self.appointments.len() as u8,
+            self.lists.len() as u8,
+            self.phone_numbers.len() as u8,
+            self.anniversaries.len() as u8,
+        ];
+        
+        // Get earliest appointment year
+        let earliest_appointment_year = self.appointments
+            .iter()
+            .min_by_key(|app| {
+                let duration_since_epoch = app.time
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .expect("Time went backwards");
+                
+                let datetime = chrono::DateTime::<chrono::Utc>::from_timestamp(
+                    duration_since_epoch.as_secs() as i64,
+                    0
+                ).expect("Invalid timestamp");
+                
+                datetime.year()
+            })
+            .map(|app| {
+                let duration_since_epoch = app.time
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .expect("Time went backwards");
+                
+                let datetime = chrono::DateTime::<chrono::Utc>::from_timestamp(
+                    duration_since_epoch.as_secs() as i64,
+                    0
+                ).expect("Invalid timestamp");
+                
+                (datetime.year() % 100) as u8
+            })
+            .unwrap_or(0);
+        
+        // Get appointment notification minutes value
+        let appointment_notification_minutes_value = 
+            notification_minutes_value(self.appointment_notification_minutes);
+        
+        // Create the header packet
+        let mut header = Vec::new();
+        header.extend_from_slice(&CPACKET_SECT);
+        
+        // Calculate number of payload packets
+        let num_payload_packets = (all_items.len() / CPACKET_DATA_LENGTH) + 1;
+        header.push(num_payload_packets as u8); // Number of payload packets
+        header.extend_from_slice(&addresses);
+        header.extend_from_slice(&items_lengths);
+        header.push(earliest_appointment_year);
+        header.push(appointment_notification_minutes_value);
+        
+        // Create payload packets using the paginator
+        use crate::helpers::cpacket_paginator::paginate_cpackets;
+        let all_data: Vec<u8> = all_items.into_iter().flatten().collect();
+        let payloads = paginate_cpackets(&CPACKET_DATA, CPACKET_DATA_LENGTH, &all_data);
+        
+        // Create the end packet
+        let end_packet = CPACKET_END.to_vec();
+        
+        // Combine all packets
+        let mut all_packets = Vec::with_capacity(payloads.len() + 3);
+        all_packets.push(CPACKET_CLEAR.to_vec());
+        all_packets.push(header);
+        all_packets.extend(payloads);
+        all_packets.push(end_packet);
+        
+        // Apply CRC wrapping
+        use crate::helpers::crc_packets_wrapper::wrap_packets_with_crc;
+        wrap_packets_with_crc(all_packets)
     }
 }
 

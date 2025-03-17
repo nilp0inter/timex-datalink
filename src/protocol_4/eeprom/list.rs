@@ -27,3 +27,44 @@ pub struct List {
     /// Priority level (optional)
     pub priority: Option<Priority>,
 }
+
+impl List {
+    /// Convert Priority enum to its numeric value
+    fn priority_value(&self) -> u8 {
+        match self.priority {
+            Some(Priority::One) => 1,
+            Some(Priority::Two) => 2,
+            Some(Priority::Three) => 3,
+            Some(Priority::Four) => 4,
+            Some(Priority::Five) => 5,
+            None => 0,
+        }
+    }
+    
+    /// Create the packet for a list item, similar to Ruby's packet method
+    /// 
+    /// This returns the raw packet bytes without the length prefix
+    fn packet_content(&self) -> Vec<u8> {
+        let mut packet = Vec::new();
+        
+        // Add priority value
+        packet.push(self.priority_value());
+        
+        // Add list entry text
+        packet.extend_from_slice(self.list_entry.as_bytes());
+        
+        packet
+    }
+    
+    /// Create the full packet including length prefix (LengthPacketWrapper in Ruby)
+    pub fn packet(&self) -> Vec<u8> {
+        let content = self.packet_content();
+        let mut result = Vec::with_capacity(content.len() + 1);
+        
+        // Add length byte (content length + 1 for the length byte itself)
+        result.push((content.len() + 1) as u8);
+        result.extend(content);
+        
+        result
+    }
+}
