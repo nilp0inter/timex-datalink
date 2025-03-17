@@ -3,6 +3,9 @@ name = "timex-datalink"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 crc16 = "0.4.0"
 num-bigint = "0.4.4"
@@ -10,13 +13,39 @@ num-traits = "0.2.18"
 serde = { version = "1.0.207", features = ["derive"] }
 serde_json = "1.0.125"
 serde_yaml = "0.9.34"
+chrono = { version = "0.4.31", features = ["wasmbind"] }
+clap = { version = "4.5.5", optional = true }
+wasm-bindgen = "0.2.91"
+serde-wasm-bindgen = "0.6.5"
+
+# Only include serial2 when not targeting wasm
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 serial2 = "0.2.26"
-chrono = "0.4.31"
-clap = "4.5.5"
+
+# These dependencies are only needed when targeting wasm
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = "0.3.68"
+web-sys = { version = "0.3.68", features = [
+    "console", 
+    "Window", 
+    "Document",
+    "HtmlElement",
+    "Element"
+]}
 
 # Include fixtures directory in the package for tests
 [package.metadata]
 include = ["fixtures/**/*"]
+
+[features]
+default = ["native"]
+native = ["clap"]
+wasm = []
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+lto = true
 
 [[example]]
 name = "protocol3_example"
@@ -26,3 +55,6 @@ path = "examples/protocol3_example.rs"
 name = "protocol4_example"
 path = "examples/protocol4_example.rs"
 
+[[bin]]
+name = "wasm_timex"
+path = "src/bin/wasm_timex.rs"

@@ -3,8 +3,11 @@
 //! This module provides the serial communication functionality to transmit
 //! formatted packets to Timex Datalink watches.
 
+#[cfg(not(target_arch = "wasm32"))]
 use std::io;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
+#[cfg(not(target_arch = "wasm32"))]
 use std::thread::sleep;
 
 /// Notebook adapter for sending data to Timex watches
@@ -63,6 +66,7 @@ impl NotebookAdapter {
     /// # Errors
     ///
     /// Returns an error if the serial device cannot be opened or if writing fails
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn write(&self, packets: &[Vec<u8>]) -> io::Result<()> {
         let port = serial2::SerialPort::open(&self.serial_device, 9600)?;
         
@@ -85,6 +89,12 @@ impl NotebookAdapter {
         }
         
         Ok(())
+    }
+    
+    /// Stub implementation for wasm target
+    #[cfg(target_arch = "wasm32")]
+    pub fn write(&self, _packets: &[Vec<u8>]) -> Result<(), &'static str> {
+        Err("Serial port functionality is not available in WebAssembly")
     }
 }
 

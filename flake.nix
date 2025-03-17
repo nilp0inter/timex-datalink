@@ -24,13 +24,20 @@
         ...
       }: {
         devShells.default = pkgs.mkShell {
-          # nativeBuildInputs = with pkgs; [
-          # ];
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+            lld
+            llvmPackages.bintools
+          ];
           buildInputs = with pkgs; [
             cargo
             rustc
             rustfmt
             clippy
+            wasm-pack
+            wasm-bindgen-cli
+            nodejs
+            python3
           ];
         };
 

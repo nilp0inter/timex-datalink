@@ -21,6 +21,12 @@ pub mod char_encoders;
 pub mod notebook_adapter;
 pub mod devices;
 
+#[cfg(target_arch = "wasm32")]
+mod lib_wasm;
+
+#[cfg(target_arch = "wasm32")]
+pub use lib_wasm::*;
+
 pub use protocol_3::Protocol3;
 pub use protocol_4::Protocol4;
 pub use notebook_adapter::NotebookAdapter;

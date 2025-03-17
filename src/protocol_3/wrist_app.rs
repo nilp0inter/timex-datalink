@@ -16,6 +16,13 @@ pub struct WristApp {
 }
 
 impl WristApp {
+    /// Create a new WristApp from raw data
+    pub fn new(wrist_app_data: Vec<u8>) -> Self {
+        Self {
+            wrist_app_data,
+        }
+    }
+    
     /// Create a new WristApp from a ZAP file path
     /// 
     /// This follows the Ruby implementation's approach of parsing ZAP files
