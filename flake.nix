@@ -124,6 +124,7 @@
             nodejs
             lld
             llvmPackages.bintools
+            binaryen
           ];
           
           # Skip the default check and install phases
@@ -145,8 +146,14 @@
               --no-default-features \
               --features "wasm"
             
-            # Copy the web files to dist directory
-            cp webapp/public/* webapp/dist/
+            # Copy only the essential web files to dist directory
+            cp webapp/public/index.html webapp/dist/
+            cp webapp/public/wasm_timex.js webapp/dist/
+            
+            # Remove TypeScript definition files and other unnecessary files
+            rm -f webapp/dist/*.d.ts
+            rm -f webapp/dist/package.json
+            rm -f webapp/dist/README.md
             
             # Create the final output directory
             mkdir -p $out

@@ -38,6 +38,7 @@ web-sys = { version = "0.3.68", features = [
 # Include fixtures directory in the package for tests
 [package.metadata]
 include = ["fixtures/**/*"]
+wasm-opt = false
 
 [features]
 default = ["native"]

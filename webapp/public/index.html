@@ -3,64 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timex Datalink Web Interface</title>
+    <title>Timex Datalink 150 Programmer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <style>
+        :root {
+            --primary: #0069D9;
+            --primary-hover: #0056b3;
+            --success: #28a745;
+            --danger: #dc3545;
+            --danger-hover: #bd2130;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --gray-dark: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--dark);
+            background-color: #f7f9fc;
+            line-height: 1.6;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            line-height: 1.6;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         h1, h2, h3 {
-            color: #2c3e50;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin: 1rem 0 0.5rem;
+            color: var(--gray-dark);
         }
 
         .container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1.5rem;
         }
 
         .section {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            background-color: #f9f9f9;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .section:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .section-content {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 1rem;
         }
 
         .form-group {
             display: grid;
             grid-template-columns: 1fr 3fr;
-            gap: 10px;
+            gap: 1rem;
             align-items: center;
         }
 
         .item-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 1rem;
+            margin-top: 0.5rem;
         }
 
         .item-row {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 1rem;
             align-items: center;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: var(--light);
         }
 
         .item-row button {
@@ -68,95 +130,135 @@
         }
 
         input, select, button {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #ced4da;
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
         button {
             cursor: pointer;
-            background-color: #3498db;
+            background-color: var(--primary);
             color: white;
             border: none;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
         }
 
         button:hover {
-            background-color: #2980b9;
+            background-color: var(--primary-hover);
         }
 
         button:disabled {
-            background-color: #95a5a6;
+            background-color: var(--gray);
             cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .action-button {
-            padding: 12px 20px;
-            font-size: 16px;
-            margin-top: 20px;
+            padding: 0.75rem 1.25rem;
+            font-size: 1rem;
+            margin-top: 1.25rem;
         }
 
         .danger {
-            background-color: #e74c3c;
+            background-color: var(--danger);
         }
 
         .danger:hover {
-            background-color: #c0392b;
+            background-color: var(--danger-hover);
         }
 
         .add-button {
-            background-color: #2ecc71;
+            background-color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .add-button:hover {
-            background-color: #27ae60;
+            background-color: #218838;
+        }
+
+        .add-button::before {
+            content: "+ ";
         }
 
         hr {
             border: 0;
             height: 1px;
-            background-color: #ddd;
-            margin: 20px 0;
+            background-color: var(--gray-light);
+            margin: 1.25rem 0;
         }
 
         #status {
-            margin: 20px 0;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #f1f1f1;
-            font-weight: bold;
+            margin: 1.25rem 0;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--light);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #status::before {
+            content: "";
+            display: inline-block;
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #6c757d;
+            border-radius: 50%;
+        }
+
+        #status.success::before {
+            background-color: var(--success);
+        }
+
+        #status.error::before {
+            background-color: var(--danger);
         }
 
         #log {
             height: 200px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            font-family: monospace;
-            margin-top: 20px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            background-color: #f8f9fa;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.875rem;
+            margin-top: 1.25rem;
         }
 
         .success {
-            color: #27ae60;
+            color: var(--success);
         }
 
         .error {
-            color: #e74c3c;
+            color: var(--danger);
         }
         
         .toggle-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.75rem;
         }
         
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 3.75rem;
+            height: 2rem;
         }
         
         .toggle-switch input {
@@ -174,57 +276,97 @@
             bottom: 0;
             background-color: #ccc;
             transition: .4s;
-            border-radius: 34px;
+            border-radius: 2rem;
         }
         
         .toggle-slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
+            height: 1.5rem;
+            width: 1.5rem;
+            left: 0.25rem;
+            bottom: 0.25rem;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
         }
         
         input:checked + .toggle-slider {
-            background-color: #2196F3;
+            background-color: var(--primary);
         }
         
         input:checked + .toggle-slider:before {
-            transform: translateX(26px);
+            transform: translateX(1.75rem);
         }
         
         .field-help {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-top: 2px;
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
         }
         
         .toggle-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+            background-color: var(--light);
+            border-radius: var(--border-radius);
         }
         
         .hidden-section {
             display: none;
         }
-        
-        .hidden-section {
-            display: none;
+
+        .connection-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .connection-buttons button {
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .status-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        /* Removed watch image styles */
+
+        .section-info {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: #e7f5ff;
+            border-left: 4px solid var(--primary);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+
+            .connection-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Timex Datalink Web Interface</h1>
-    <div id="status">Status: Waiting for WebAssembly to load...</div>
+    <header>
+        <h1>Timex Datalink 150 Programmer</h1>
+    </header>
+
+    <div id="status">Waiting for WebAssembly to load...</div>
     
     <div class="container">
         <div class="section">
@@ -232,15 +374,20 @@
                 <h2>Connection</h2>
             </div>
             <div class="section-content">
-                <button id="connectButton" disabled>Connect to Serial Port</button>
-                <button id="sendDataButton" disabled>Send Data to Watch</button>
-                <button id="disconnectButton" disabled>Disconnect</button>
+                <div class="section-info">
+                    Connect the Notebook Adapter to your computer. Position your Timex Datalink 150 watch in front of the adapter's optical emitter and place the watch in receive mode before sending data.
+                </div>
+                <div class="connection-buttons">
+                    <button id="connectButton" disabled>Connect Serial Port</button>
+                    <button id="sendDataButton" disabled>Send Data to Watch</button>
+                    <button id="disconnectButton" disabled>Disconnect</button>
+                </div>
             </div>
         </div>
         
         <div class="section">
             <div class="section-header">
-                <h2>Data Sections</h2>
+                <h2>Watch Features</h2>
             </div>
             <div class="section-content">
                 <div class="toggle-group">
@@ -261,7 +408,7 @@
                     </label>
                     
                     <label class="toggle-container">
-                        <span>EEPROM Data</span>
+                        <span>Personal Data</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="includeEeprom" checked onchange="toggleSection('eeprom')">
                             <span class="toggle-slider"></span>
@@ -294,9 +441,11 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="syncLength">Sync Length:</label>
-                    <input type="number" id="syncLength" min="50" max="255" value="150">
-                    <div class="field-help">Length of the sync signal in bytes (default: 150)</div>
+                    <label for="syncLength">Sync Signal Length:</label>
+                    <div>
+                        <input type="number" id="syncLength" min="50" max="255" value="150">
+                        <div class="field-help">Length of the sync signal in bytes (default: 150)</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -307,10 +456,12 @@
             </div>
             <div class="section-content">
                 <div class="form-group">
-                    <label for="watchTimeDate">Reference Date/Time (UTC):</label>
-                    <input type="datetime-local" id="watchTimeDate">
-                    <div class="field-help">Reference time in UTC (timezone offsets will be applied)</div>
-                    <button id="setCurrentTimeButton" type="button">Set to Current Time</button>
+                    <label for="watchTimeDate">Reference Time (UTC):</label>
+                    <div>
+                        <input type="datetime-local" id="watchTimeDate">
+                        <button id="setCurrentTimeButton" type="button">Set Current Time</button>
+                        <div class="field-help">Reference time in UTC (timezone offsets will be applied)</div>
+                    </div>
                 </div>
                 
                 <h3>Time Zone 1</h3>
@@ -349,9 +500,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="time1Name">Name:</label>
-                    <input type="text" id="time1Name" value="EST" maxlength="3">
-                    <div class="field-help">Maximum 3 characters</div>
+                    <label for="time1Name">Display Name:</label>
+                    <div>
+                        <input type="text" id="time1Name" value="EST" maxlength="3">
+                        <div class="field-help">Maximum 3 characters</div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="time1Format">Date Format:</label>
@@ -408,9 +561,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="time2Name">Name:</label>
-                    <input type="text" id="time2Name" value="GMT" maxlength="3">
-                    <div class="field-help">Maximum 3 characters</div>
+                    <label for="time2Name">Display Name:</label>
+                    <div>
+                        <input type="text" id="time2Name" value="GMT" maxlength="3">
+                        <div class="field-help">Maximum 3 characters</div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="time2Format">Date Format:</label>
@@ -438,6 +593,9 @@
                 <h2>Alarms</h2>
             </div>
             <div class="section-content">
+                <div class="section-info">
+                    Configure up to 5 daily alarms with custom messages.
+                </div>
                 <div id="alarmsList" class="item-list">
                     <!-- Alarms will be added here dynamically -->
                 </div>
@@ -447,17 +605,19 @@
         
         <div id="eepromSection" class="section">
             <div class="section-header">
-                <h2>EEPROM Data</h2>
+                <h2>Personal Data</h2>
             </div>
             <div class="section-content">
-                <p>EEPROM data includes Appointments, Anniversaries, Phone Numbers, and Lists. Due to protocol limitations, all of these must be sent together.</p>
+                <div class="section-info">
+                    Store appointments, anniversaries, phone numbers, and to-do lists in your watch. Due to watch memory limitations, all of these must be sent together.
+                </div>
                 
                 <h3>Appointments</h3>
                 <div class="form-group">
-                    <label for="appointmentNotification">Pre-notification:</label>
+                    <label for="appointmentNotification">Reminder Alert:</label>
                     <select id="appointmentNotification">
-                        <option value="-1">No beep</option>
-                        <option value="0">At time of appointments</option>
+                        <option value="-1">No alert</option>
+                        <option value="0">At time of appointment</option>
                         <option value="5">5 minutes before</option>
                         <option value="10">10 minutes before</option>
                         <option value="15" selected>15 minutes before</option>
@@ -483,11 +643,11 @@
                 </div>
                 <button id="addPhoneNumberButton" class="add-button">Add Phone Number</button>
                 
-                <h3>Lists</h3>
+                <h3>To-Do List</h3>
                 <div id="listsList" class="item-list">
                     <!-- Lists will be added here dynamically -->
                 </div>
-                <button id="addListButton" class="add-button">Add List Item</button>
+                <button id="addListButton" class="add-button">Add To-Do Item</button>
             </div>
         </div>
         
@@ -518,12 +678,17 @@
                 <h2>Sound Theme</h2>
             </div>
             <div class="section-content">
-                <div class="form-group">
-                    <label for="soundThemeFile">SPC File:</label>
-                    <input type="file" id="soundThemeFile" accept=".spc">
-                    <div class="field-help">Upload a Sound Theme .SPC file</div>
+                <div class="section-info">
+                    Upload a custom sound theme (.SPC file) for your watch alerts and notifications.
                 </div>
-                <div id="soundThemeInfo" class="field-help">No file selected</div>
+                <div class="form-group">
+                    <label for="soundThemeFile">Sound Theme File:</label>
+                    <div>
+                        <input type="file" id="soundThemeFile" accept=".spc">
+                        <div class="field-help">Upload a Sound Theme .SPC file</div>
+                        <div id="soundThemeInfo" class="field-help">No file selected</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -532,12 +697,17 @@
                 <h2>Wrist App</h2>
             </div>
             <div class="section-content">
-                <div class="form-group">
-                    <label for="wristAppFile">ZAP File:</label>
-                    <input type="file" id="wristAppFile" accept=".zap">
-                    <div class="field-help">Upload a Wrist App .ZAP file</div>
+                <div class="section-info">
+                    Load additional functionality with a Wrist App (.ZAP file).
                 </div>
-                <div id="wristAppInfo" class="field-help">No file selected</div>
+                <div class="form-group">
+                    <label for="wristAppFile">Wrist App File:</label>
+                    <div>
+                        <input type="file" id="wristAppFile" accept=".zap">
+                        <div class="field-help">Upload a Wrist App .ZAP file</div>
+                        <div id="wristAppInfo" class="field-help">No file selected</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -596,7 +766,7 @@
         // Function to update the status message
         function updateStatus(message, isError = false, isSuccess = false) {
             const statusElem = document.getElementById('status');
-            statusElem.textContent = `Status: ${message}`;
+            statusElem.textContent = message;
             
             statusElem.classList.remove('error', 'success');
             if (isError) {
