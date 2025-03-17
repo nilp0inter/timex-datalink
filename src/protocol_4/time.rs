@@ -52,3 +52,61 @@ impl PacketGenerator for Time {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{TimeZone, Utc};
+
+    // Helper function to create a SystemTime from date components
+    fn system_time_from_date(year: i32, month: u32, day: u32, hour: u32, min: u32, sec: u32) -> SystemTime {
+        // Create a DateTime with chrono
+        let naive_dt = chrono::NaiveDate::from_ymd_opt(year, month, day)
+            .unwrap()
+            .and_hms_opt(hour, min, sec)
+            .unwrap();
+        
+        let dt = Utc.from_utc_datetime(&naive_dt);
+        
+        // Convert to system time
+        SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(dt.timestamp() as u64)
+    }
+
+    #[test]
+    fn test_time_12h() {
+        let time = Time {
+            zone: 1,
+            is_24h: false,
+            date_format: DateFormat::MonthDashDayDashYear,
+            time: system_time_from_date(2022, 9, 5, 3, 39, 44),
+            name: CharString::new("PDT", true),
+        };
+
+        // From golden fixture: time_12h.jsonl
+        #[rustfmt::skip]
+        let expected = vec![vec![
+            17, 50, 1, 44, 3, 39, 9, 5, 22, 25, 13, 29, 0, 1, 0, 190, 59
+        ]];
+
+        assert_eq!(time.packets(), expected);
+    }
+
+    #[test]
+    fn test_time_24h() {
+        let time = Time {
+            zone: 2,
+            is_24h: true,
+            date_format: DateFormat::MonthDashDayDashYear,
+            time: system_time_from_date(2022, 9, 5, 11, 39, 44),
+            name: CharString::new("GMT", true),
+        };
+
+        // From golden fixture: time_24h.jsonl
+        #[rustfmt::skip]
+        let expected = vec![vec![
+            17, 50, 2, 44, 11, 39, 9, 5, 22, 16, 22, 29, 0, 2, 0, 118, 112
+        ]];
+
+        assert_eq!(time.packets(), expected);
+    }
+}

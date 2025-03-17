@@ -24,19 +24,17 @@ impl PacketGenerator for End {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::PacketGenerator;
 
     #[test]
-    fn test_packets() {
+    fn test_end() {
         let end = End {};
         
-        // Get packets from the End instance (already CRC-wrapped)
-        let packets = end.packets();
-        
-        // Expected wrapped packet from the Ruby code (timex_datalink_client_spec.rb)
-        let expected_packet = vec![0x04, 0x21, 0xd8, 0xc2];
-        
-        assert_eq!(packets.len(), 1);
-        assert_eq!(packets[0], expected_packet);
+        // From golden fixture: end.jsonl
+        #[rustfmt::skip]
+        let expected = vec![vec![
+            4, 33, 216, 194
+        ]];
+
+        assert_eq!(end.packets(), expected);
     }
 }

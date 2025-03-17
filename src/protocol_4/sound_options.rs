@@ -18,3 +18,24 @@ impl PacketGenerator for SoundOptions {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sound_options() {
+        let sound_options = SoundOptions {
+            hourly_chime: true,
+            button_beep: false,
+        };
+
+        // From golden fixture: sound_options.jsonl
+        #[rustfmt::skip]
+        let expected = vec![vec![
+            6, 113, 1, 0, 3, 81
+        ]];
+
+        assert_eq!(sound_options.packets(), expected);
+    }
+}

@@ -24,19 +24,17 @@ impl PacketGenerator for Start {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::PacketGenerator;
 
     #[test]
-    fn test_packets() {
+    fn test_start() {
         let start = Start {};
         
-        // Get packets from the Start instance (already CRC-wrapped)
-        let packets = start.packets();
-        
-        // Expected wrapped packet from the Ruby code (timex_datalink_client_spec.rb)
-        let expected_packet = vec![0x07, 0x20, 0x00, 0x00, 0x04, 0xc3, 0xbf];
-        
-        assert_eq!(packets.len(), 1);
-        assert_eq!(packets[0], expected_packet);
+        // From golden fixture: start.jsonl
+        #[rustfmt::skip]
+        let expected = vec![vec![
+            7, 32, 0, 0, 4, 195, 191
+        ]];
+
+        assert_eq!(start.packets(), expected);
     }
 }
