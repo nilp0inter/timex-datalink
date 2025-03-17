@@ -107,6 +107,62 @@
           };
         };
 
+        # WebAssembly webapp package
+        packages.webapp = pkgs.rustPlatform.buildRustPackage {
+          pname = "timex-datalink-webapp";
+          version = "0.1.0";
+          
+          src = ./.;
+          
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+          };
+          
+          nativeBuildInputs = with pkgs; [
+            wasm-pack
+            wasm-bindgen-cli
+            nodejs
+            lld
+            llvmPackages.bintools
+          ];
+          
+          # Skip the default check and install phases
+          doCheck = false;
+          dontInstall = true;
+          
+          buildPhase = ''
+            # Create a home directory for cargo
+            export HOME=$TMPDIR
+            
+            # Create output directory
+            mkdir -p webapp/dist
+            
+            # Build the WebAssembly package
+            wasm-pack build \
+              --target web \
+              --out-name timex_datalink_wasm \
+              --out-dir webapp/dist \
+              --no-default-features \
+              --features "wasm"
+            
+            # Copy the web files to dist directory
+            cp webapp/public/* webapp/dist/
+            
+            # Create the final output directory
+            mkdir -p $out
+            cp -r webapp/dist/* $out/
+          '';
+          
+          meta = with nixpkgs.lib; {
+            description = "WebAssembly interface for Timex Datalink watches";
+            homepage = "https://github.com/nilp0inter/timex-datalink";
+            license = licenses.gpl3;
+            platforms = platforms.linux;
+            maintainers = with maintainers; [nilp0inter];
+            mainProgram = "timex-datalink-webapp";
+          };
+        };
+
         packages.default = self'.packages.timex-datalink;
 
         formatter = pkgs.alejandra;

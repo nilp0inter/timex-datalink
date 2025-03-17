@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
+name = "timex_datalink"
+path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
@@ -55,6 +57,4 @@ path = "examples/protocol3_example.rs"
 name = "protocol4_example"
 path = "examples/protocol4_example.rs"
 
-[[bin]]
-name = "wasm_timex"
-path = "src/bin/wasm_timex.rs"
+# No duplicate lib section needed
