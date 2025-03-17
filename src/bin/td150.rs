@@ -439,7 +439,7 @@ fn main() {
     // Add wrist app if provided
     if let Some(wrist_app_path) = wrist_app_file {
         let path = PathBuf::from(wrist_app_path);
-        match WristApp::from_zap_file(&path) {
+        match WristApp::from_zap_file(path) {
             Ok(app) => protocol.add(app),
             Err(e) => {
                 eprintln!("Error loading wrist app: {}", e);
