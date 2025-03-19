@@ -23,5 +23,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           configurationFile: renovate.json
+          autodiscover: true
         env:
           LOG_LEVEL: 'info'
