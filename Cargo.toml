@@ -10,24 +10,24 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 crc16 = "0.4.0"
-num-bigint = "0.4.4"
-num-traits = "0.2.18"
-serde = { version = "1.0.207", features = ["derive"] }
-serde_json = "1.0.125"
+num-bigint = "0.4.6"
+num-traits = "0.2.19"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 serde_yaml = "0.9.34"
-chrono = { version = "0.4.31", features = ["wasmbind"] }
-clap = { version = "4.5.5", optional = true }
-wasm-bindgen = "0.2.91"
+chrono = { version = "0.4.40", features = ["wasmbind"] }
+clap = { version = "4.5.32", optional = true }
+wasm-bindgen = "0.2.100"
 serde-wasm-bindgen = "0.6.5"
 
 # Only include serial2 when not targeting wasm
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-serial2 = "0.2.26"
+serial2 = "0.2.28"
 
 # These dependencies are only needed when targeting wasm
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys = "0.3.68"
-web-sys = { version = "0.3.68", features = [
+js-sys = "0.3.77"
+web-sys = { version = "0.3.77", features = [
     "console", 
     "Window", 
     "Document",
