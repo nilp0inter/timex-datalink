@@ -1866,11 +1866,26 @@
 
         // Sign out
         function signOut() {
+            // Clear session storage
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('token_expiry');
             sessionStorage.removeItem('code_verifier');
-            updateAuthUI(false);
-            log('Signed out from Google');
+            
+            // Redirect to Google's revocation endpoint to fully sign out
+            const revokeUrl = "https://accounts.google.com/o/oauth2/revoke?token=" + sessionStorage.getItem('access_token');
+            
+            // Create a hidden iframe to trigger Google logout without navigating away
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = "https://accounts.google.com/logout";
+            document.body.appendChild(iframe);
+            
+            // Remove iframe after logout completes and update UI
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+                updateAuthUI(false);
+                log('Signed out from Google');
+            }, 1000);
         }
 
         // Update UI based on authentication state
