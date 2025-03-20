@@ -2,6 +2,8 @@
 name = "timex-datalink"
 version = "0.1.0"
 edition = "2021"
+description = "Rust implementation of the Timex Datalink protocol for communicating with Timex watches"
+license = "MIT"
 
 [lib]
 name = "timex_datalink"
