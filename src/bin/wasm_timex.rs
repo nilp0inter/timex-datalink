@@ -9,7 +9,14 @@ use timex_datalink::{
     char_encoders::CharString,
     protocol_3::time::DateFormat,
 };
-use chrono::{DateTime, Utc, TimeZone};
+use chrono::{Utc, TimeZone};
+
+// This module is only meant to be compiled as a WebAssembly library, not as a binary.
+#[allow(dead_code)]
+fn main() {
+    // This function is not meant to be called directly.
+    // It only exists to satisfy the Rust compiler's requirement for binaries.
+}
 
 // Helper function to create a SystemTime from date components
 fn system_time_from_date(year: i32, month: u32, day: u32, hour: u32, min: u32) -> SystemTime {
