@@ -370,6 +370,9 @@ function importSelectedCalendarEvents() {
         appointmentsList.appendChild(createAppointmentRow(appointment));
     });
     
+    // Save the imported appointments to localStorage
+    saveFormData();
+    
     log(`Successfully imported ${appointments.length} events to appointments`);
 }
 
@@ -580,6 +583,9 @@ function importSelectedTasks() {
         listsList.appendChild(createListRow(item));
     });
     
+    // Save the imported tasks to localStorage
+    saveFormData();
+    
     log(`Successfully imported ${listItems.length} tasks to to-do list`);
 }
 
@@ -729,6 +735,9 @@ function importSelectedContacts() {
     phoneEntries.forEach(phone => {
         phoneNumbersList.appendChild(createPhoneNumberRow(phone));
     });
+    
+    // Save the imported contacts to localStorage
+    saveFormData();
     
     log(`Successfully imported ${phoneEntries.length} contacts to phone numbers`);
 }

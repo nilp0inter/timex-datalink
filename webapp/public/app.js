@@ -377,6 +377,8 @@ function createAlarmRow(alarm) {
     numberInput.value = alarm.number;
     numberInput.className = 'alarm-number';
     numberInput.style.width = '50px';
+    numberInput.addEventListener('change', saveFormData);
+    numberInput.addEventListener('input', saveFormData);
     
     const hourLabel = document.createElement('span');
     hourLabel.textContent = 'Time:';
@@ -388,6 +390,8 @@ function createAlarmRow(alarm) {
     hourInput.value = alarm.hour;
     hourInput.className = 'alarm-hour';
     hourInput.style.width = '50px';
+    hourInput.addEventListener('change', saveFormData);
+    hourInput.addEventListener('input', saveFormData);
     
     const timeColon = document.createElement('span');
     timeColon.textContent = ':';
@@ -399,6 +403,8 @@ function createAlarmRow(alarm) {
     minuteInput.value = alarm.minute;
     minuteInput.className = 'alarm-minute';
     minuteInput.style.width = '50px';
+    minuteInput.addEventListener('change', saveFormData);
+    minuteInput.addEventListener('input', saveFormData);
     
     const messageLabel = document.createElement('span');
     messageLabel.textContent = 'Message:';
@@ -408,6 +414,8 @@ function createAlarmRow(alarm) {
     messageInput.value = alarm.message;
     messageInput.className = 'alarm-message';
     messageInput.maxLength = 8;
+    messageInput.addEventListener('change', saveFormData);
+    messageInput.addEventListener('input', saveFormData);
     
     const audibleLabel = document.createElement('span');
     audibleLabel.textContent = 'Audible:';
@@ -419,6 +427,7 @@ function createAlarmRow(alarm) {
     audibleInput.type = 'checkbox';
     audibleInput.checked = alarm.audible;
     audibleInput.className = 'alarm-audible';
+    audibleInput.addEventListener('change', saveFormData);
     
     const sliderSpan = document.createElement('span');
     sliderSpan.className = 'toggle-slider';
@@ -431,6 +440,7 @@ function createAlarmRow(alarm) {
     removeButton.textContent = 'Remove';
     removeButton.onclick = function() {
         row.remove();
+        saveFormData();
     };
     
     row.appendChild(numberLabel);
@@ -460,6 +470,7 @@ function createAppointmentRow(appointment) {
     dateInput.type = 'datetime-local';
     dateInput.value = appointment.date;
     dateInput.className = 'appointment-date';
+    dateInput.addEventListener('change', saveFormData);
     
     const messageLabel = document.createElement('span');
     messageLabel.textContent = 'Message:';
@@ -469,12 +480,15 @@ function createAppointmentRow(appointment) {
     messageInput.value = appointment.message;
     messageInput.className = 'appointment-message';
     messageInput.maxLength = 12;
+    messageInput.addEventListener('change', saveFormData);
+    messageInput.addEventListener('input', saveFormData);
     
     const removeButton = document.createElement('button');
     removeButton.className = 'danger';
     removeButton.textContent = 'Remove';
     removeButton.onclick = function() {
         row.remove();
+        saveFormData();
     };
     
     row.appendChild(dateLabel);
@@ -498,6 +512,7 @@ function createAnniversaryRow(anniversary) {
     dateInput.type = 'date';
     dateInput.value = anniversary.date;
     dateInput.className = 'anniversary-date';
+    dateInput.addEventListener('change', saveFormData);
     
     const messageLabel = document.createElement('span');
     messageLabel.textContent = 'Description:';
@@ -507,12 +522,15 @@ function createAnniversaryRow(anniversary) {
     messageInput.value = anniversary.message;
     messageInput.className = 'anniversary-message';
     messageInput.maxLength = 12;
+    messageInput.addEventListener('change', saveFormData);
+    messageInput.addEventListener('input', saveFormData);
     
     const removeButton = document.createElement('button');
     removeButton.className = 'danger';
     removeButton.textContent = 'Remove';
     removeButton.onclick = function() {
         row.remove();
+        saveFormData();
     };
     
     row.appendChild(dateLabel);
@@ -537,6 +555,8 @@ function createPhoneNumberRow(phone) {
     nameInput.value = phone.name;
     nameInput.className = 'phone-name';
     nameInput.maxLength = 12;
+    nameInput.addEventListener('change', saveFormData);
+    nameInput.addEventListener('input', saveFormData);
     
     const numberLabel = document.createElement('span');
     numberLabel.textContent = 'Number:';
@@ -546,12 +566,15 @@ function createPhoneNumberRow(phone) {
     numberInput.value = phone.number;
     numberInput.className = 'phone-number';
     numberInput.maxLength = 20;
+    numberInput.addEventListener('change', saveFormData);
+    numberInput.addEventListener('input', saveFormData);
     
     const typeLabel = document.createElement('span');
     typeLabel.textContent = 'Type:';
     
     const typeInput = document.createElement('select');
     typeInput.className = 'phone-type';
+    typeInput.addEventListener('change', saveFormData);
     
     const typeOptions = [
         { value: "H", text: "Home" },
@@ -577,6 +600,7 @@ function createPhoneNumberRow(phone) {
     removeButton.textContent = 'Remove';
     removeButton.onclick = function() {
         row.remove();
+        saveFormData();
     };
     
     row.appendChild(nameLabel);
@@ -603,12 +627,15 @@ function createListRow(list) {
     entryInput.value = list.entry;
     entryInput.className = 'list-entry';
     entryInput.maxLength = 12;
+    entryInput.addEventListener('change', saveFormData);
+    entryInput.addEventListener('input', saveFormData);
     
     const priorityLabel = document.createElement('span');
     priorityLabel.textContent = 'Priority:';
     
     const priorityInput = document.createElement('select');
     priorityInput.className = 'list-priority';
+    priorityInput.addEventListener('change', saveFormData);
     
     const priorityOptions = [
         { value: "1", text: "1 - Highest" },
@@ -634,6 +661,7 @@ function createListRow(list) {
     removeButton.textContent = 'Remove';
     removeButton.onclick = function() {
         row.remove();
+        saveFormData();
     };
     
     row.appendChild(entryLabel);
@@ -645,8 +673,214 @@ function createListRow(list) {
     return row;
 }
 
+// Function to save form data to localStorage
+function saveFormData() {
+    // Skip saving during initial page load
+    if (window.initialLoadInProgress) {
+        console.log('Skipping save during initial load');
+        return;
+    }
+    
+    try {
+        // Collect all data
+        const formData = collectFormData();
+        
+        // Save each section individually
+        localStorage.setItem('timexDatalink_alarms', JSON.stringify(formData.alarms));
+        localStorage.setItem('timexDatalink_appointments', JSON.stringify(formData.appointments));
+        localStorage.setItem('timexDatalink_anniversaries', JSON.stringify(formData.anniversaries));
+        localStorage.setItem('timexDatalink_phoneNumbers', JSON.stringify(formData.phoneNumbers));
+        localStorage.setItem('timexDatalink_lists', JSON.stringify(formData.lists));
+        localStorage.setItem('timexDatalink_time1', JSON.stringify({
+            name: document.getElementById('time1Name').value,
+            is24h: document.getElementById('time1Is24h').checked,
+            format: document.getElementById('time1Format').value,
+            timezone: document.getElementById('time1Timezone').value
+        }));
+        localStorage.setItem('timexDatalink_time2', JSON.stringify({
+            name: document.getElementById('time2Name').value,
+            is24h: document.getElementById('time2Is24h').checked,
+            format: document.getElementById('time2Format').value,
+            timezone: document.getElementById('time2Timezone').value
+        }));
+        localStorage.setItem('timexDatalink_soundOptions', JSON.stringify({
+            hourlyChime: document.getElementById('hourlyChime').checked,
+            buttonBeep: document.getElementById('buttonBeep').checked
+        }));
+        localStorage.setItem('timexDatalink_appointmentNotification', document.getElementById('appointmentNotification').value);
+        localStorage.setItem('timexDatalink_syncLength', document.getElementById('syncLength').value);
+        
+        // Save toggle states
+        localStorage.setItem('timexDatalink_toggles', JSON.stringify({
+            includeTime: document.getElementById('includeTime').checked,
+            includeAlarms: document.getElementById('includeAlarms').checked,
+            includeEeprom: document.getElementById('includeEeprom').checked,
+            includeSoundOptions: document.getElementById('includeSoundOptions').checked,
+            includeSoundTheme: document.getElementById('includeSoundTheme').checked,
+            includeWristApp: document.getElementById('includeWristApp').checked
+        }));
+        
+        log('Data saved to localStorage');
+    } catch (error) {
+        log(`Error saving to localStorage: ${error.message}`, true);
+        console.error('Error saving to localStorage:', error);
+    }
+}
+
+// Function to load data from localStorage or use defaults
+function loadFormData() {
+    try {
+        // Clear existing items
+        document.getElementById('alarmsList').innerHTML = '';
+        document.getElementById('appointmentsList').innerHTML = '';
+        document.getElementById('anniversariesList').innerHTML = '';
+        document.getElementById('phoneNumbersList').innerHTML = '';
+        document.getElementById('listsList').innerHTML = '';
+        
+        // Load alarms or use defaults
+        const savedAlarms = localStorage.getItem('timexDatalink_alarms');
+        const alarmsList = document.getElementById('alarmsList');
+        if (savedAlarms) {
+            JSON.parse(savedAlarms).forEach(alarm => {
+                alarmsList.appendChild(createAlarmRow(alarm));
+            });
+        } else {
+            defaultAlarms.forEach(alarm => {
+                alarmsList.appendChild(createAlarmRow(alarm));
+            });
+        }
+        
+        // Load appointments or use defaults
+        const savedAppointments = localStorage.getItem('timexDatalink_appointments');
+        const appointmentsList = document.getElementById('appointmentsList');
+        if (savedAppointments) {
+            JSON.parse(savedAppointments).forEach(appointment => {
+                appointmentsList.appendChild(createAppointmentRow(appointment));
+            });
+        } else {
+            defaultAppointments.forEach(appointment => {
+                appointmentsList.appendChild(createAppointmentRow(appointment));
+            });
+        }
+        
+        // Load anniversaries or use defaults
+        const savedAnniversaries = localStorage.getItem('timexDatalink_anniversaries');
+        const anniversariesList = document.getElementById('anniversariesList');
+        if (savedAnniversaries) {
+            JSON.parse(savedAnniversaries).forEach(anniversary => {
+                anniversariesList.appendChild(createAnniversaryRow(anniversary));
+            });
+        } else {
+            defaultAnniversaries.forEach(anniversary => {
+                anniversariesList.appendChild(createAnniversaryRow(anniversary));
+            });
+        }
+        
+        // Load phone numbers or use defaults
+        const savedPhoneNumbers = localStorage.getItem('timexDatalink_phoneNumbers');
+        const phoneNumbersList = document.getElementById('phoneNumbersList');
+        if (savedPhoneNumbers) {
+            JSON.parse(savedPhoneNumbers).forEach(phone => {
+                phoneNumbersList.appendChild(createPhoneNumberRow(phone));
+            });
+        } else {
+            defaultPhoneNumbers.forEach(phone => {
+                phoneNumbersList.appendChild(createPhoneNumberRow(phone));
+            });
+        }
+        
+        // Load lists or use defaults
+        const savedLists = localStorage.getItem('timexDatalink_lists');
+        const listsList = document.getElementById('listsList');
+        if (savedLists) {
+            JSON.parse(savedLists).forEach(list => {
+                listsList.appendChild(createListRow(list));
+            });
+        } else {
+            defaultLists.forEach(list => {
+                listsList.appendChild(createListRow(list));
+            });
+        }
+        
+        // Load time1 settings
+        const savedTime1 = localStorage.getItem('timexDatalink_time1');
+        if (savedTime1) {
+            const time1Data = JSON.parse(savedTime1);
+            document.getElementById('time1Name').value = time1Data.name;
+            document.getElementById('time1Is24h').checked = time1Data.is24h;
+            document.getElementById('time1Format').value = time1Data.format;
+            document.getElementById('time1Timezone').value = time1Data.timezone;
+        }
+        
+        // Load time2 settings
+        const savedTime2 = localStorage.getItem('timexDatalink_time2');
+        if (savedTime2) {
+            const time2Data = JSON.parse(savedTime2);
+            document.getElementById('time2Name').value = time2Data.name;
+            document.getElementById('time2Is24h').checked = time2Data.is24h;
+            document.getElementById('time2Format').value = time2Data.format;
+            document.getElementById('time2Timezone').value = time2Data.timezone;
+        }
+        
+        // Load sound options
+        const savedSoundOptions = localStorage.getItem('timexDatalink_soundOptions');
+        if (savedSoundOptions) {
+            const soundOptions = JSON.parse(savedSoundOptions);
+            document.getElementById('hourlyChime').checked = soundOptions.hourlyChime;
+            document.getElementById('buttonBeep').checked = soundOptions.buttonBeep;
+        }
+        
+        // Load appointment notification setting
+        const savedAppointmentNotification = localStorage.getItem('timexDatalink_appointmentNotification');
+        if (savedAppointmentNotification) {
+            document.getElementById('appointmentNotification').value = savedAppointmentNotification;
+        }
+        
+        // Load sync length
+        const savedSyncLength = localStorage.getItem('timexDatalink_syncLength');
+        if (savedSyncLength) {
+            document.getElementById('syncLength').value = savedSyncLength;
+        }
+        
+        // Load toggles
+        const savedToggles = localStorage.getItem('timexDatalink_toggles');
+        if (savedToggles) {
+            const toggles = JSON.parse(savedToggles);
+            document.getElementById('includeTime').checked = toggles.includeTime;
+            document.getElementById('includeAlarms').checked = toggles.includeAlarms;
+            document.getElementById('includeEeprom').checked = toggles.includeEeprom;
+            document.getElementById('includeSoundOptions').checked = toggles.includeSoundOptions;
+            document.getElementById('includeSoundTheme').checked = toggles.includeSoundTheme;
+            document.getElementById('includeWristApp').checked = toggles.includeWristApp;
+            
+            // Update section visibility based on loaded toggles
+            toggleSection('time');
+            toggleSection('alarms');
+            toggleSection('eeprom');
+            toggleSection('sound');
+            toggleSection('soundtheme');
+            toggleSection('wristapp');
+        }
+        
+        log('Data loaded from localStorage');
+    } catch (error) {
+        log(`Error loading from localStorage: ${error.message}`, true);
+        console.error('Error loading from localStorage:', error);
+        
+        // Fall back to defaults if there's an error
+        populateWithDefaults();
+    }
+}
+
 // Function to populate form with default data
-function populateForm() {
+function populateWithDefaults() {
+    // Clear existing items
+    document.getElementById('alarmsList').innerHTML = '';
+    document.getElementById('appointmentsList').innerHTML = '';
+    document.getElementById('anniversariesList').innerHTML = '';
+    document.getElementById('phoneNumbersList').innerHTML = '';
+    document.getElementById('listsList').innerHTML = '';
+    
     // Populate Alarms
     const alarmsList = document.getElementById('alarmsList');
     defaultAlarms.forEach(alarm => {
@@ -676,6 +910,65 @@ function populateForm() {
     defaultLists.forEach(list => {
         listsList.appendChild(createListRow(list));
     });
+    
+    log('Populated form with default data');
+}
+
+// Function to load sample data
+function loadSampleData() {
+    try {
+        // Clear existing data
+        localStorage.removeItem('timexDatalink_alarms');
+        localStorage.removeItem('timexDatalink_appointments');
+        localStorage.removeItem('timexDatalink_anniversaries');
+        localStorage.removeItem('timexDatalink_phoneNumbers');
+        localStorage.removeItem('timexDatalink_lists');
+        localStorage.removeItem('timexDatalink_time1');
+        localStorage.removeItem('timexDatalink_time2');
+        localStorage.removeItem('timexDatalink_soundOptions');
+        localStorage.removeItem('timexDatalink_appointmentNotification');
+        localStorage.removeItem('timexDatalink_syncLength');
+        localStorage.removeItem('timexDatalink_toggles');
+        
+        log('Loading sample data...');
+        
+        // Set default toggle states
+        document.getElementById('includeTime').checked = true;
+        document.getElementById('includeAlarms').checked = true;
+        document.getElementById('includeEeprom').checked = true;
+        document.getElementById('includeSoundOptions').checked = true;
+        document.getElementById('includeSoundTheme').checked = false;
+        document.getElementById('includeWristApp').checked = false;
+        
+        // Reset sound theme and wrist app data
+        soundThemeData = null;
+        wristAppData = null;
+        
+        // Reset file input elements and info text
+        document.getElementById('soundThemeFile').value = '';
+        document.getElementById('wristAppFile').value = '';
+        document.getElementById('soundThemeInfo').textContent = 'No file selected';
+        document.getElementById('wristAppInfo').textContent = 'No file selected';
+        
+        // Update section visibility
+        toggleSection('time', true);
+        toggleSection('alarms', true);
+        toggleSection('eeprom', true);
+        toggleSection('sound', true);
+        toggleSection('soundtheme', true);
+        toggleSection('wristapp', true);
+        
+        // Populate with default data
+        populateWithDefaults();
+        
+        // Save the default toggle states
+        saveFormData();
+        
+        log('Sample data loaded successfully');
+    } catch (error) {
+        log(`Error loading sample data: ${error.message}`, true);
+        console.error('Error loading sample data:', error);
+    }
 }
 
 // Global variables to store file data
@@ -688,6 +981,7 @@ function handleSoundThemeFileUpload(event) {
     if (!file) {
         document.getElementById('soundThemeInfo').textContent = 'No file selected';
         soundThemeData = null;
+        saveFormData();
         return;
     }
     
@@ -704,6 +998,7 @@ function handleSoundThemeFileUpload(event) {
         
         // Enable the include checkbox
         document.getElementById('includeSoundTheme').checked = true;
+        saveFormData();
     };
     reader.onerror = function() {
         log('Error reading Sound Theme file', true);
@@ -719,6 +1014,7 @@ function handleWristAppFileUpload(event) {
     if (!file) {
         document.getElementById('wristAppInfo').textContent = 'No file selected';
         wristAppData = null;
+        saveFormData();
         return;
     }
     
@@ -735,6 +1031,7 @@ function handleWristAppFileUpload(event) {
         
         // Enable the include checkbox
         document.getElementById('includeWristApp').checked = true;
+        saveFormData();
     };
     reader.onerror = function() {
         log('Error reading Wrist App file', true);
@@ -764,6 +1061,10 @@ async function initializePage() {
         // Set current time in the datetime-local input
         setCurrentTime();
         
+        // First load data from localStorage or populate with defaults
+        // This must happen BEFORE setting up event listeners
+        loadFormData();
+        
         // Add event listeners
         document.getElementById('connectButton').addEventListener('click', connectToSerialPort);
         document.getElementById('sendDataButton').addEventListener('click', sendDataToWatch);
@@ -782,13 +1083,58 @@ async function initializePage() {
                     section.removeChild(section.firstChild);
                 }
                 log(`Cleared all items from ${sectionId}`);
+                
+                // Save updated state
+                saveFormData();
             }
+        }
+
+        // Add event listeners for form changes
+        function addChangeListeners() {
+            // Time zone settings
+            document.getElementById('time1Name').addEventListener('change', saveFormData);
+            document.getElementById('time1Is24h').addEventListener('change', saveFormData);
+            document.getElementById('time1Format').addEventListener('change', saveFormData);
+            document.getElementById('time1Timezone').addEventListener('change', saveFormData);
+            document.getElementById('time2Name').addEventListener('change', saveFormData);
+            document.getElementById('time2Is24h').addEventListener('change', saveFormData);
+            document.getElementById('time2Format').addEventListener('change', saveFormData);
+            document.getElementById('time2Timezone').addEventListener('change', saveFormData);
+            
+            // Sound options
+            document.getElementById('hourlyChime').addEventListener('change', saveFormData);
+            document.getElementById('buttonBeep').addEventListener('change', saveFormData);
+            
+            // Other settings
+            document.getElementById('appointmentNotification').addEventListener('change', saveFormData);
+            document.getElementById('syncLength').addEventListener('change', saveFormData);
+            
+            // Toggle switches with section visibility
+            document.getElementById('includeTime').addEventListener('change', function() {
+                toggleSection('time');
+            });
+            document.getElementById('includeAlarms').addEventListener('change', function() {
+                toggleSection('alarms');
+            });
+            document.getElementById('includeEeprom').addEventListener('change', function() {
+                toggleSection('eeprom');
+            });
+            document.getElementById('includeSoundOptions').addEventListener('change', function() {
+                toggleSection('sound');
+            });
+            document.getElementById('includeSoundTheme').addEventListener('change', function() {
+                toggleSection('soundtheme');
+            });
+            document.getElementById('includeWristApp').addEventListener('change', function() {
+                toggleSection('wristapp');
+            });
         }
 
         // Add event listeners for "Add" buttons
         document.getElementById('addAlarmButton').addEventListener('click', () => {
             const newAlarm = { number: 1, audible: true, hour: 9, minute: 0, message: "" };
             document.getElementById('alarmsList').appendChild(createAlarmRow(newAlarm));
+            saveFormData();
         });
         
         document.getElementById('addAppointmentButton').addEventListener('click', () => {
@@ -796,6 +1142,7 @@ async function initializePage() {
             const formattedDate = today.toISOString().substring(0, 16);
             const newAppointment = { date: formattedDate, message: "" };
             document.getElementById('appointmentsList').appendChild(createAppointmentRow(newAppointment));
+            saveFormData();
         });
         
         document.getElementById('addAnniversaryButton').addEventListener('click', () => {
@@ -803,16 +1150,19 @@ async function initializePage() {
             const formattedDate = today.toISOString().substring(0, 10);
             const newAnniversary = { date: formattedDate, message: "" };
             document.getElementById('anniversariesList').appendChild(createAnniversaryRow(newAnniversary));
+            saveFormData();
         });
         
         document.getElementById('addPhoneNumberButton').addEventListener('click', () => {
             const newPhone = { name: "", number: "", type: "H" };
             document.getElementById('phoneNumbersList').appendChild(createPhoneNumberRow(newPhone));
+            saveFormData();
         });
         
         document.getElementById('addListButton').addEventListener('click', () => {
             const newList = { entry: "", priority: 3 };
             document.getElementById('listsList').appendChild(createListRow(newList));
+            saveFormData();
         });
         
         // Add event listeners for "Clear" buttons
@@ -843,10 +1193,18 @@ async function initializePage() {
             clearSection('phoneNumbersList');
             clearSection('listsList');
             log('Cleared all EEPROM data');
+            saveFormData();
         });
         
-        // Populate the form with default data
-        populateForm();
+        // Add event listener for "Load Sample Data" button
+        document.getElementById('loadSampleDataButton').addEventListener('click', () => {
+            if (confirm('This will load sample data and replace your current data. Are you sure?')) {
+                loadSampleData();
+            }
+        });
+        
+        // Set up change listeners for form inputs - this must happen AFTER loading data
+        addChangeListeners();
         
         log('Interface initialized successfully');
         
@@ -858,7 +1216,7 @@ async function initializePage() {
 }
 
 // Function to toggle section visibility
-function toggleSection(sectionName) {
+function toggleSection(sectionName, skipSave = false) {
     const sectionId = sectionName === 'soundtheme' ? 'soundthemeSection' :
                       sectionName === 'wristapp' ? 'wristappSection' :
                       sectionName === 'sound' ? 'soundSection' :
@@ -880,6 +1238,11 @@ function toggleSection(sectionName) {
         } else {
             section.classList.add('hidden-section');
         }
+        
+        // Save toggle state change (but only if not in initialization)
+        if (!skipSave) {
+            saveFormData();
+        }
     } else {
         console.log(`Section ${sectionId} or checkbox ${checkboxId} not found`);
     }
@@ -887,16 +1250,45 @@ function toggleSection(sectionName) {
 
 // Initialize section visibility
 function initSectionVisibility() {
-    toggleSection('time');
-    toggleSection('alarms');
-    toggleSection('eeprom');
-    toggleSection('sound');
-    toggleSection('soundtheme');
-    toggleSection('wristapp');
+    // Use skipSave=true to avoid triggering save operations during initialization
+    toggleSection('time', true);
+    toggleSection('alarms', true);
+    toggleSection('eeprom', true);
+    toggleSection('sound', true);
+    toggleSection('soundtheme', true);
+    toggleSection('wristapp', true);
+}
+
+// Function to handle tab switching
+function initTabSystem() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all tabs
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and its content
+            button.classList.add('active');
+            const tabId = button.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
 }
 
 // When the page loads
 window.addEventListener('load', function() {
+    // Set a flag to prevent saving during initial load
+    window.initialLoadInProgress = true;
+    
     initializePage();
     initSectionVisibility();
+    initTabSystem();
+    
+    // Clear the flag after initialization is complete
+    setTimeout(() => {
+        window.initialLoadInProgress = false;
+    }, 100);
 });

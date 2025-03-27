@@ -33,86 +33,107 @@
         
         <div class="section">
             <div class="section-header">
-                <h2>Google Integration</h2>
+                <h2>Import Data</h2>
             </div>
             <div class="section-content">
                 <div class="section-info">
-                    Connect to your Google account to import Calendar events, Tasks, and Contacts directly to your watch.
-                </div>
-                <div id="googleAuthButtons" class="connection-buttons">
-                    <button id="signInButton" class="add-button">Sign in with Google</button>
-                    <button id="signOutButton" style="display:none">Sign Out</button>
+                    Import data from various sources to populate your watch with information.
                 </div>
                 
-                <!-- Google Calendar Section (hidden until authenticated) -->
-                <div id="googleCalendarSection" style="display:none" class="google-data-section">
-                    <h3>Calendar Events</h3>
-                    <div class="form-group">
-                        <label for="calendarDateStart">Start Date:</label>
-                        <input type="date" id="calendarDateStart">
+                <!-- Tab Navigation -->
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="google-tab">Google</button>
+                    <button class="tab-button" data-tab="sample-data-tab">Sample Data</button>
+                </div>
+                
+                <!-- Google Tab Content -->
+                <div id="google-tab" class="tab-content active">
+                    <div class="section-info">
+                        Connect to your Google account to import Calendar events, Tasks, and Contacts directly to your watch.
                     </div>
-                    <div class="form-group">
-                        <label for="calendarDateEnd">End Date:</label>
-                        <input type="date" id="calendarDateEnd">
+                    <div id="googleAuthButtons" class="connection-buttons">
+                        <button id="signInButton" class="add-button">Sign in with Google</button>
+                        <button id="signOutButton" style="display:none">Sign Out</button>
                     </div>
-                    <button id="loadCalendarButton" class="add-button">Load Calendar Events</button>
-                    <div id="calendarEventsContainer" class="google-data-list" style="display:none">
-                        <div class="google-data-header">
-                            <h4>Select events to import</h4>
-                            <div class="select-actions">
-                                <button id="selectAllCalendarEvents" class="small-button">Select All</button>
-                                <button id="deselectAllCalendarEvents" class="small-button">Deselect All</button>
-                            </div>
+                    
+                    <!-- Google Calendar Section (hidden until authenticated) -->
+                    <div id="googleCalendarSection" style="display:none" class="google-data-section">
+                        <h3>Calendar Events</h3>
+                        <div class="form-group">
+                            <label for="calendarDateStart">Start Date:</label>
+                            <input type="date" id="calendarDateStart">
                         </div>
-                        <div id="calendarEventsList" class="google-data-items"></div>
-                        <button id="importCalendarEvents" class="add-button">Import Selected Events</button>
+                        <div class="form-group">
+                            <label for="calendarDateEnd">End Date:</label>
+                            <input type="date" id="calendarDateEnd">
+                        </div>
+                        <button id="loadCalendarButton" class="add-button">Load Calendar Events</button>
+                        <div id="calendarEventsContainer" class="google-data-list" style="display:none">
+                            <div class="google-data-header">
+                                <h4>Select events to import</h4>
+                                <div class="select-actions">
+                                    <button id="selectAllCalendarEvents" class="small-button">Select All</button>
+                                    <button id="deselectAllCalendarEvents" class="small-button">Deselect All</button>
+                                </div>
+                            </div>
+                            <div id="calendarEventsList" class="google-data-items"></div>
+                            <button id="importCalendarEvents" class="add-button">Import Selected Events</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Google Tasks Section (hidden until authenticated) -->
+                    <div id="googleTasksSection" style="display:none" class="google-data-section">
+                        <h3>Tasks</h3>
+                        <div class="form-group">
+                            <label for="taskListSelect">Task List:</label>
+                            <select id="taskListSelect">
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+                        <button id="loadTasksButton" class="add-button">Load Tasks</button>
+                        <div id="tasksContainer" class="google-data-list" style="display:none">
+                            <div class="google-data-header">
+                                <h4>Select tasks to import</h4>
+                                <div class="search-filter">
+                                    <input type="text" id="tasksSearchInput" placeholder="Filter tasks...">
+                                </div>
+                                <div class="select-actions">
+                                    <button id="selectAllTasks" class="small-button">Select All</button>
+                                    <button id="deselectAllTasks" class="small-button">Deselect All</button>
+                                </div>
+                            </div>
+                            <div id="tasksList" class="google-data-items"></div>
+                            <button id="importTasks" class="add-button">Import Selected Tasks</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Google Contacts Section (hidden until authenticated) -->
+                    <div id="googleContactsSection" style="display:none" class="google-data-section">
+                        <h3>Contacts</h3>
+                        <div class="form-group">
+                            <label for="contactsSearchInput">Search Contacts:</label>
+                            <input type="text" id="contactsSearchInput" placeholder="Type to search...">
+                        </div>
+                        <button id="loadContactsButton" class="add-button">Search Contacts</button>
+                        <div id="contactsContainer" class="google-data-list" style="display:none">
+                            <div class="google-data-header">
+                                <h4>Select contacts to import</h4>
+                                <div class="select-actions">
+                                    <button id="selectAllContacts" class="small-button">Select All</button>
+                                    <button id="deselectAllContacts" class="small-button">Deselect All</button>
+                                </div>
+                            </div>
+                            <div id="contactsList" class="google-data-items"></div>
+                            <button id="importContacts" class="add-button">Import Selected Contacts</button>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Google Tasks Section (hidden until authenticated) -->
-                <div id="googleTasksSection" style="display:none" class="google-data-section">
-                    <h3>Tasks</h3>
-                    <div class="form-group">
-                        <label for="taskListSelect">Task List:</label>
-                        <select id="taskListSelect">
-                            <option value="">Loading...</option>
-                        </select>
-                    </div>
-                    <button id="loadTasksButton" class="add-button">Load Tasks</button>
-                    <div id="tasksContainer" class="google-data-list" style="display:none">
-                        <div class="google-data-header">
-                            <h4>Select tasks to import</h4>
-                            <div class="search-filter">
-                                <input type="text" id="tasksSearchInput" placeholder="Filter tasks...">
-                            </div>
-                            <div class="select-actions">
-                                <button id="selectAllTasks" class="small-button">Select All</button>
-                                <button id="deselectAllTasks" class="small-button">Deselect All</button>
-                            </div>
-                        </div>
-                        <div id="tasksList" class="google-data-items"></div>
-                        <button id="importTasks" class="add-button">Import Selected Tasks</button>
-                    </div>
-                </div>
-                
-                <!-- Google Contacts Section (hidden until authenticated) -->
-                <div id="googleContactsSection" style="display:none" class="google-data-section">
-                    <h3>Contacts</h3>
-                    <div class="form-group">
-                        <label for="contactsSearchInput">Search Contacts:</label>
-                        <input type="text" id="contactsSearchInput" placeholder="Type to search...">
-                    </div>
-                    <button id="loadContactsButton" class="add-button">Search Contacts</button>
-                    <div id="contactsContainer" class="google-data-list" style="display:none">
-                        <div class="google-data-header">
-                            <h4>Select contacts to import</h4>
-                            <div class="select-actions">
-                                <button id="selectAllContacts" class="small-button">Select All</button>
-                                <button id="deselectAllContacts" class="small-button">Deselect All</button>
-                            </div>
-                        </div>
-                        <div id="contactsList" class="google-data-items"></div>
-                        <button id="importContacts" class="add-button">Import Selected Contacts</button>
+                <!-- Sample Data Tab Content -->
+                <div id="sample-data-tab" class="tab-content">
+                    <div class="sample-data-container">
+                        <p>Load sample data to see how the watch features work. This will replace any existing data with a set of example alarms, appointments, anniversaries, phone numbers, and to-do items.</p>
+                        <button id="loadSampleDataButton" class="add-button">Load Sample Data</button>
                     </div>
                 </div>
             </div>
@@ -127,7 +148,7 @@
                     <label class="toggle-container">
                         <span>Time</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="includeTime" checked onchange="toggleSection('time')">
+                            <input type="checkbox" id="includeTime" checked>
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
@@ -135,7 +156,7 @@
                     <label class="toggle-container">
                         <span>Alarms</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="includeAlarms" checked onchange="toggleSection('alarms')">
+                            <input type="checkbox" id="includeAlarms" checked>
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
@@ -143,7 +164,7 @@
                     <label class="toggle-container">
                         <span>Personal Data</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="includeEeprom" checked onchange="toggleSection('eeprom')">
+                            <input type="checkbox" id="includeEeprom" checked>
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
@@ -151,7 +172,7 @@
                     <label class="toggle-container">
                         <span>Sound Options</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="includeSoundOptions" checked onchange="toggleSection('sound')">
+                            <input type="checkbox" id="includeSoundOptions" checked>
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
@@ -159,7 +180,7 @@
                     <label class="toggle-container">
                         <span>Sound Theme</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="includeSoundTheme" onchange="toggleSection('soundtheme')">
+                            <input type="checkbox" id="includeSoundTheme">
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
@@ -167,7 +188,7 @@
                     <label class="toggle-container">
                         <span>Wrist App</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="includeWristApp" onchange="toggleSection('wristapp')">
+                            <input type="checkbox" id="includeWristApp">
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
@@ -180,6 +201,7 @@
                         <div class="field-help">Length of the sync signal in bytes (default: 150)</div>
                     </div>
                 </div>
+
             </div>
         </div>
         
