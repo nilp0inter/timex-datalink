@@ -147,8 +147,7 @@
               --features "wasm"
             
             # Copy only the essential web files to dist directory
-            cp webapp/public/index.html webapp/dist/
-            cp webapp/public/wasm_timex.js webapp/dist/
+            cp webapp/public/*.{html,js,css} webapp/dist/
             
             # Remove TypeScript definition files and other unnecessary files
             rm -f webapp/dist/*.d.ts

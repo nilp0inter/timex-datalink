@@ -42,3 +42,4 @@ Cargo.lock
 .direnv
 .envrc
 
+.aider*
