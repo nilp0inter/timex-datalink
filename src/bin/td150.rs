@@ -15,7 +15,7 @@ use timex_datalink::{
         time::DateFormat,
         Alarm, End, SoundOptions, SoundTheme, Start, Sync, Time, WristApp,
     },
-    NotebookAdapter, PacketGenerator, Protocol3,
+    NotebookAdapter, OnePlus6LedAdapter, PacketGenerator, Protocol3,
 };
 
 // Custom beep model equivalent to Ruby's Beep class
@@ -126,11 +126,26 @@ fn main() {
                 .value_name("ZAP_FILE"),
         )
         .arg(
+            Arg::new("adapter")
+                .long("adapter")
+                .help("Specify the adapter type to use")
+                .value_name("TYPE")
+                .value_parser(["serial", "led"])
+                .default_value("serial"),
+        )
+        .arg(
             Arg::new("serial-device")
                 .long("serial-device")
-                .help("Specify a serial device")
+                .help("Specify a serial device (for serial adapter)")
                 .value_name("DEVICE")
                 .default_value("/dev/ttyACM0"),
+        )
+        .arg(
+            Arg::new("led-path")
+                .long("led-path")
+                .help("Specify the LED sysfs path (for LED adapter)")
+                .value_name("PATH")
+                .default_value("/sys/class/leds/rgb:status"),
         )
         .arg(
             Arg::new("verbose")
@@ -194,7 +209,9 @@ fn main() {
     let json_file = matches.get_one::<String>("json_file");
     let sound_theme_file = matches.get_one::<String>("sound-theme");
     let wrist_app_file = matches.get_one::<String>("wrist-app");
+    let adapter_type = matches.get_one::<String>("adapter").unwrap();
     let serial_device = matches.get_one::<String>("serial-device").unwrap();
+    let led_path = matches.get_one::<String>("led-path").unwrap();
     let verbose = matches.get_flag("verbose");
     let no_appointments = matches.get_flag("no-appointments");
     let no_anniversaries = matches.get_flag("no-anniversaries");
@@ -463,31 +480,59 @@ fn main() {
         println!("Generated {} packets for Protocol 3", packets.len());
     }
 
-    // Create the notebook adapter and send the packets
-    if !serial_device.is_empty() {
-        if verbose {
-            println!("Transmitting data to the watch on port: {}", serial_device);
-        }
-        
-        let adapter = NotebookAdapter::new(
-            serial_device.to_string(),
-            None,     // Use default sleep time
-            None,     // Use default sleep time
-            verbose,  // Verbosity flag from command line
-        );
-        
-        match adapter.write(&packets) {
-            Ok(_) => {
-                if verbose {
-                    println!("Successfully transmitted data to the watch!");
-                }
-            },
-            Err(e) => {
-                eprintln!("Error transmitting data: {}", e);
-                process::exit(1);
+    // Create the appropriate adapter and send the packets
+    match adapter_type.as_str() {
+        "serial" => {
+            if verbose {
+                println!("Using serial adapter on port: {}", serial_device);
             }
+            
+            let adapter = NotebookAdapter::new(
+                serial_device.to_string(),
+                None,     // Use default sleep time
+                None,     // Use default sleep time
+                verbose,  // Verbosity flag from command line
+            );
+            
+            match adapter.write(&packets) {
+                Ok(_) => {
+                    if verbose {
+                        println!("Successfully transmitted data to the watch!");
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Error transmitting data: {}", e);
+                    process::exit(1);
+                }
+            }
+        },
+        "led" => {
+            if verbose {
+                println!("Using LED adapter with path: {}", led_path);
+            }
+            
+            let adapter = OnePlus6LedAdapter::new(
+                Some(led_path.to_string()),
+                None,     // Use default sleep time
+                None,     // Use default sleep time
+                verbose,  // Verbosity flag from command line
+            );
+            
+            match adapter.write(&packets) {
+                Ok(_) => {
+                    if verbose {
+                        println!("Successfully transmitted data to the watch!");
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Error transmitting data: {}", e);
+                    process::exit(1);
+                }
+            }
+        },
+        _ => {
+            eprintln!("Invalid adapter type: {}", adapter_type);
+            process::exit(1);
         }
-    } else {
-        println!("No serial port specified. Running in preview mode only.");
     }
 }

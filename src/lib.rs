@@ -19,6 +19,7 @@ pub mod protocol_4;
 pub mod helpers;
 pub mod char_encoders;
 pub mod notebook_adapter;
+pub mod oneplus6_led_adapter;
 pub mod devices;
 
 #[cfg(target_arch = "wasm32")]
@@ -30,3 +31,4 @@ pub use lib_wasm::*;
 pub use protocol_3::Protocol3;
 pub use protocol_4::Protocol4;
 pub use notebook_adapter::NotebookAdapter;
+pub use oneplus6_led_adapter::OnePlus6LedAdapter;
