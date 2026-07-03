@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 crc16 = "0.4.0"
-num-bigint = "0.4.6"
+num-bigint = "0.5.0"
 num-traits = "0.2.19"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
